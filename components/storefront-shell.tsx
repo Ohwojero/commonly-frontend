@@ -15,13 +15,14 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { fetchProducts, fetchCategories, formatPrice, type ApiProduct, type ApiCategory } from '@/lib/api'
+import { fetchProducts, formatPrice, type ApiProduct } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { SiteHeader, SiteFooter } from '@/components/site-header'
 import { ProductCard } from '@/components/product-card'
+import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
 
 // Map ApiProduct to frontend-friendly display shape
 function toDisplayProduct(p: ApiProduct) {
@@ -55,36 +56,43 @@ function ProductCardSkeleton() {
 export function StorefrontShell() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [preview, setPreview] = useState<ReturnType<typeof toDisplayProduct> | null>(null)
-  const [activeTabSlug, setActiveTabSlug] = useState<string | null>(null)
+  const [activeTabKey, setActiveTabKey] = useState('')
+  const [activeGroupSlug, setActiveGroupSlug] = useState<string | null>(null)
   const [emailInput, setEmailInput] = useState('')
   const [emailSubscribed, setEmailSubscribed] = useState(false)
   const [allProducts, setAllProducts] = useState<ReturnType<typeof toDisplayProduct>[]>([])
-  const [apiCategories, setApiCategories] = useState<ApiCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [heroProductIndex, setHeroProductIndex] = useState(0)
   const [heroSlideDirection, setHeroSlideDirection] = useState<'next' | 'previous'>('next')
   const [heroPaused, setHeroPaused] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      fetchProducts({ sort: 'views' }).catch(() => []),
-      fetchCategories().catch(() => []),
-    ])
-      .then(([productsData, categoriesData]) => {
+    fetchProducts({ sort: 'views' }).catch(() => [])
+      .then((productsData) => {
         setAllProducts(productsData.map(toDisplayProduct))
-        setApiCategories(categoriesData)
       })
       .finally(() => setLoading(false))
   }, [])
 
-  const dynamicFilterTabs = [
-    { label: 'All Curations', slug: null },
-    ...apiCategories.map((c) => ({ label: c.label, slug: c.slug })),
-  ]
+  const dynamicFilterTabs = storefrontNavGroups.flatMap((group) =>
+    group.items.map((item) => ({
+        key: `subcategory:${group.slug}:${storefrontNavSlug(item)}`,
+        label: item,
+        subcategorySlug: storefrontNavSlug(item),
+    }))
+  )
 
   const filteredProducts = allProducts.filter((p) => {
-    if (!activeTabSlug) return true
-    return p.categorySlug === activeTabSlug
+    const activeGroup = storefrontNavGroups.find((group) => group.slug === activeGroupSlug)
+    if (activeGroup) return activeGroup.catalogSlugs.includes(p.categorySlug)
+    const activeTab = dynamicFilterTabs.find((tab) => tab.key === activeTabKey)
+    if (!activeTab) return true
+    return p.subcategorySlug === activeTab.subcategorySlug
+  })
+
+  const categoryCards = storefrontNavGroups.map((group) => {
+    const products = allProducts.filter((product) => group.catalogSlugs.includes(product.categorySlug))
+    return { group, products, featuredProduct: products[0] }
   })
 
   // Spotlight: prefer isSpotlight product, then first product
@@ -332,59 +340,61 @@ export function StorefrontShell() {
           </div>
         </section>
 
-        {/* Categories Section — Real database categories */}
+        {/* Categories Section */}
         <section id="categories" className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">Curated Prestige Collections</p>
               <h2 className="mt-2 font-serif text-3xl sm:text-5xl">Shop by Category</h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-                Elevate your everyday ritual with high-ticket curations across medical-grade skincare, professional hair tools, and clinical esthetics.
+                Explore considered skincare, treatment technology, salon hair tools, and fragrance and body care.
               </p>
             </div>
-            <Link href="#shop" className="shrink-0 text-xs font-semibold uppercase tracking-widest text-accent underline underline-offset-4">
-              View All {loading ? '—' : allProducts.length} Curations
-            </Link>
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {loading ? 'Loading collection' : `${allProducts.length} curated picks`}
+            </p>
           </div>
 
-          {/* Real Categories Grid */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {apiCategories.map((category) => {
-              const productCount = allProducts.filter((p) => p.categorySlug === category.slug).length
-              const subLabels = category.subcategories?.map((s) => s.label).join(' · ') || category.eyebrow
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {categoryCards.map(({ group, products, featuredProduct }, index) => {
+              const selected = activeGroupSlug === group.slug
               return (
-                <Link
-                  key={category.id || category.slug}
-                  href={`/category/${category.slug}`}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border/80 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent hover:shadow-xl"
-                >
-                  <div>
-                    <div className="relative mb-5 aspect-video w-full overflow-hidden rounded-xl bg-muted">
-                      <img
-                        src={category.image}
-                        alt={category.label}
-                        className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <span className="absolute bottom-2.5 right-2.5 rounded-full bg-black/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                        {productCount > 0 ? `${productCount} verified picks` : `${category.subcategories?.length || 0} subcategories`}
-                      </span>
+                <article key={group.slug} className={`group overflow-hidden rounded-xl border bg-card transition-colors ${selected ? 'border-accent ring-1 ring-accent/30' : 'border-border/80 hover:border-accent/50'}`}>
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    <img
+                      src={featuredProduct?.image || '/luxury-placeholder.svg'}
+                      alt={featuredProduct?.name || group.label}
+                      className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      onError={(event) => { (event.target as HTMLImageElement).src = '/luxury-placeholder.svg' }}
+                    />
+                    <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+                      {loading ? 'Loading' : products.length ? `${products.length} picks` : 'New collection'}
+                    </span>
+                    <span className="absolute bottom-3 right-3 grid size-9 place-items-center rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover:translate-x-0.5">
+                      <span className="sr-only">Collection {index + 1}</span>
+                      <ArrowRight className="size-4" />
+                    </span>
+                  </div>
+                  <div className="flex min-h-48 flex-col p-5">
+                    <div>
+                      <h3 className="mt-2 font-serif text-2xl">{group.label}</h3>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">{group.description}</p>
                     </div>
-                    <h3 className="font-serif text-2xl transition-colors group-hover:text-accent">
-                      {category.label}
-                    </h3>
-                    <p className="mt-2 text-xs font-medium tracking-wide text-accent line-clamp-1">
-                      {subLabels}
-                    </p>
-                    <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {category.description}
-                    </p>
+                    <Button
+                      type="button"
+                      variant={selected ? 'default' : 'outline'}
+                      className="mt-5 w-full justify-between text-xs uppercase tracking-wider"
+                      onClick={() => {
+                        setActiveTabKey('')
+                        setActiveGroupSlug((current) => current === group.slug ? null : group.slug)
+                        document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })
+                      }}
+                    >
+                      {selected ? 'Showing this edit' : 'View curated picks'}
+                      <ArrowRight className="size-3.5" />
+                    </Button>
                   </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors group-hover:text-accent">
-                    <span>Explore edit</span>
-                    <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </div>
-                </Link>
+                </article>
               )
             })}
           </div>
@@ -417,11 +427,14 @@ export function StorefrontShell() {
             <div className="flex flex-wrap gap-2">
               {dynamicFilterTabs.map((tab) => (
                 <button
-                  key={tab.label}
+                  key={tab.key}
                   type="button"
-                  onClick={() => setActiveTabSlug(tab.slug)}
+                  onClick={() => {
+                    setActiveGroupSlug(null)
+                    setActiveTabKey((current) => current === tab.key ? '' : tab.key)
+                  }}
                   className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
-                    activeTabSlug === tab.slug
+                    activeTabKey === tab.key
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'border border-border/80 bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground'
                   }`}
@@ -435,9 +448,9 @@ export function StorefrontShell() {
           <p className="mb-8 text-xs uppercase tracking-widest font-semibold text-muted-foreground">
             {loading
               ? 'Loading picks...'
-              : `Showing ${filteredProducts.length} verified picks in ${
-                  dynamicFilterTabs.find((t) => t.slug === activeTabSlug)?.label || 'All Curations'
-                }`}
+              : activeTabKey
+                ? `Showing ${filteredProducts.length} verified picks in ${dynamicFilterTabs.find((tab) => tab.key === activeTabKey)?.label}`
+                : `Showing ${filteredProducts.length} verified picks`}
           </p>
 
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">

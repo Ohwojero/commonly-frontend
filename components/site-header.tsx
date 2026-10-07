@@ -5,35 +5,11 @@ import { ChevronDown, LogOut, Menu, User, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { RegisterGate } from '@/components/register-gate'
 import { useAuth } from '@/lib/auth-store'
+import { storefrontNavGroups, storefrontNavSlug, type StorefrontNavGroup } from '@/lib/storefront-navigation'
 
-type MenuGroup = { label: string; slug: string; items: string[] }
-const groups: MenuGroup[] = [
-  {
-    label: 'Luxury Skincare',
-    slug: 'luxury-skincare',
-    items: ['Anti-Aging Matrices', 'High-End Serums', 'Clinical Sun Care', 'Hyperpigmentation'],
-  },
-  {
-    label: 'Clinical Tech',
-    slug: 'clinical-tech',
-    items: ['LED & Microcurrent Devices', 'At-Home Laser Systems', 'Advanced Skin Tightening'],
-  },
-  {
-    label: 'Salon Hair',
-    slug: 'salon-hair',
-    items: ['Styling & Drying Tech', 'Molecular Bond Repair', 'Premium Scalp & Growth'],
-  },
-  {
-    label: 'Fragrance & Body',
-    slug: 'fragrance-body',
-    items: ['High-End Fragrances', 'Luxury Body Oils'],
-  },
-]
-
-const toSlug = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-
-function DropdownGroup({ group, onNavigate }: { group: MenuGroup; onNavigate: () => void }) {
+function DropdownGroup({ group, onNavigate }: { group: StorefrontNavGroup; onNavigate: () => void }) {
   const [open, setOpen] = useState(false)
+
   return (
     <div className="group relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
@@ -50,7 +26,7 @@ function DropdownGroup({ group, onNavigate }: { group: MenuGroup; onNavigate: ()
           {group.items.map((item) => (
             <Link
               key={item}
-              href={`/category/${group.slug}/${toSlug(item)}`}
+              href={`/category/${group.slug}/${storefrontNavSlug(item)}`}
               onClick={onNavigate}
               className="block rounded-sm px-3 py-2.5 text-xs uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
@@ -68,7 +44,6 @@ export function SiteHeader() {
   const [authOpen, setAuthOpen] = useState(false)
   const { user, logout } = useAuth()
 
-  // Listen for product card save button asking to open auth modal
   useEffect(() => {
     const handler = () => setAuthOpen(true)
     window.addEventListener('commonly:open-auth', handler)
@@ -77,7 +52,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs tracking-wider text-primary-foreground font-medium">
+      <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs font-medium tracking-wider text-primary-foreground">
         Curated with Care · Independent Luxury &amp; Clinical Editorial · Verified Amazon Prime Fulfillment
       </div>
       <header className="fixed inset-x-0 top-8 z-50 border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-xl">
@@ -85,24 +60,18 @@ export function SiteHeader() {
           <button className="md:hidden" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)}>
             {open ? <X /> : <Menu />}
           </button>
-          <Link href="/" className="font-serif text-2xl tracking-tight shrink-0">
-            Commonly.
-          </Link>
+          <Link href="/" className="shrink-0 font-serif text-2xl tracking-tight">Commonly.</Link>
           <nav
             className={`${open ? 'flex' : 'hidden'} absolute left-0 top-full z-20 max-h-[calc(100vh-7rem)] w-full flex-col gap-1 overflow-y-auto border-b border-border/80 bg-background p-3 shadow-lg md:static md:flex md:max-h-none md:w-auto md:flex-1 md:flex-row md:justify-center md:gap-0.5 md:overflow-visible md:border-0 md:bg-transparent md:p-0 md:shadow-none lg:gap-1.5`}
             aria-label="Main navigation"
           >
-            {groups.map((group) => (
+            {storefrontNavGroups.map((group) => (
               <DropdownGroup key={group.label} group={group} onNavigate={() => setOpen(false)} />
             ))}
-
-            {/* Mobile auth buttons inside menu */}
             <div className="mt-3 border-t border-border/60 pt-3 md:hidden">
               {user ? (
                 <div className="flex flex-col gap-2">
-                  <p className="px-3 text-xs text-muted-foreground">
-                    Signed in as <strong>{user.name || user.email}</strong>
-                  </p>
+                  <p className="px-3 text-xs text-muted-foreground">Signed in as <strong>{user.name || user.email}</strong></p>
                   <button
                     type="button"
                     onClick={() => { setOpen(false); logout() }}
@@ -124,14 +93,10 @@ export function SiteHeader() {
               )}
             </div>
           </nav>
-
-          {/* Desktop Right Side */}
           <div className="flex items-center gap-3">
             {user ? (
-              <div className="hidden md:flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {user.name || user.email}
-                </span>
+              <div className="hidden items-center gap-2 md:flex">
+                <span className="text-xs text-muted-foreground">{user.name || user.email}</span>
                 <button
                   type="button"
                   onClick={logout}
@@ -154,20 +119,12 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
-
-      {/* Login / Register Popup Modal */}
-      <RegisterGate
-        isOpen={authOpen}
-        onClose={() => setAuthOpen(false)}
-        showTrigger={false}
-        initialMode="login"
-      />
+      <RegisterGate isOpen={authOpen} onClose={() => setAuthOpen(false)} showTrigger={false} initialMode="login" />
     </>
   )
 }
 
 export function SiteFooter() {
-  const toSlug = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
   return (
     <footer className="border-t bg-primary px-5 py-14 text-primary-foreground lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
@@ -185,9 +142,9 @@ export function SiteFooter() {
               { label: 'Clinical Tech', slug: 'clinical-tech' },
               { label: 'Salon Hair', slug: 'salon-hair' },
               { label: 'Fragrance & Body', slug: 'fragrance-body' },
-            ].map((cat) => (
-              <Link key={cat.slug} href={`/category/${cat.slug}`} className="hover:text-primary-foreground">
-                {cat.label}
+            ].map((category) => (
+              <Link key={category.slug} href={`/category/${category.slug}`} className="hover:text-primary-foreground">
+                {category.label}
               </Link>
             ))}
           </div>
@@ -213,16 +170,16 @@ export function SiteFooter() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">High-Ticket Edits</p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/80">
             <Link href="/category/luxury-skincare/high-end-serums" className="hover:text-primary-foreground">High-End Serums</Link>
-            <Link href="/category/salon-hair/styling-drying-tech" className="hover:text-primary-foreground">Styling & Drying Tech</Link>
+            <Link href="/category/salon-hair/styling-drying-tech" className="hover:text-primary-foreground">Styling &amp; Drying Tech</Link>
             <Link href="/category/luxury-skincare/clinical-sun-care" className="hover:text-primary-foreground">Clinical Sun Care</Link>
-            <Link href="/category/clinical-tech/led-microcurrent-devices" className="hover:text-primary-foreground">LED & Microcurrent Devices</Link>
+            <Link href="/category/clinical-tech/led-microcurrent-devices" className="hover:text-primary-foreground">LED &amp; Microcurrent Devices</Link>
             <Link href="/category/fragrance-body/high-end-fragrances" className="hover:text-primary-foreground">High-End Fragrances</Link>
           </div>
         </div>
       </div>
       <div className="mx-auto mt-14 flex max-w-7xl flex-col gap-3 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between">
         <span>© 2026 Commonly. All rights reserved.</span>
-        <span className="max-w-md text-center sm:text-right leading-relaxed">
+        <span className="max-w-md text-center leading-relaxed sm:text-right">
           As an Amazon Associate I earn from qualifying purchases. Product prices, ratings, and availability are subject to change. Any price and availability information displayed on Amazon at the time of purchase will apply.
         </span>
       </div>
@@ -230,5 +187,8 @@ export function SiteFooter() {
   )
 }
 
-export function SiteChrome({ children }: { children: React.ReactNode }) { return <div className="min-h-screen bg-background"><SiteHeader />{children}<SiteFooter /></div> }
+export function SiteChrome({ children }: { children: React.ReactNode }) {
+  return <div className="min-h-screen bg-background"><SiteHeader />{children}<SiteFooter /></div>
+}
+
 export default SiteHeader

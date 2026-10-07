@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { type Product } from '@/lib/products'
 import { type Category, apiCategoryToCategory } from '@/lib/categories'
+import { storefrontNavGroups } from '@/lib/storefront-navigation'
 import {
   fetchProducts,
   fetchCategories,
@@ -64,7 +65,7 @@ const STORAGE_KEYS = {
 const FALLBACK_IMG = '/luxury-placeholder.svg'
 
 const emptyProduct: ProductForm = {
-  name: '', brand: '', category: 'Luxury Skincare', subcategory: '',
+  name: '', brand: '', category: 'luxury-skincare', subcategory: '',
   image: '', images: [], affiliateUrl: '', description: '',
   highlights: '', itemDetails: '', specs: '', tags: '',
   rating: '5.0', views: '0',
@@ -379,10 +380,10 @@ export default function DashboardPage() {
   useEffect(() => { if (view === 'media') reloadMedia() }, [view])
 
   // — Derived
-  const categoryOptions = groups.map(g => g.label)
   const filtered = useMemo(() => items.filter(item => {
     const matchesQuery = `${item.name} ${item.brand} ${item.category} ${item.subcategory || ''}`.toLowerCase().includes(query.toLowerCase())
-    const matchesCat = catFilter === 'All' || item.category === catFilter
+    const selectedNavGroup = storefrontNavGroups.find(group => group.label === catFilter)
+    const matchesCat = catFilter === 'All' || !!selectedNavGroup?.catalogSlugs.includes(item.categorySlug || '')
     return matchesQuery && matchesCat
   }), [items, query, catFilter])
 
@@ -409,9 +410,10 @@ export default function DashboardPage() {
 
   const openEdit = (item: Product) => {
     setEditing(item.slug)
+    const navGroup = storefrontNavGroups.find(group => group.catalogSlugs.includes(item.categorySlug || ''))
     setForm({
-      name: item.name, brand: item.brand, category: item.category,
-      subcategory: item.subcategory || '', image: item.image,
+      name: item.name, brand: item.brand, category: navGroup?.slug || '',
+      subcategory: item.subcategorySlug || '', image: item.image,
       images: item.images || [],
       affiliateUrl: item.affiliateUrl || '',
       description: item.description,
@@ -432,10 +434,14 @@ export default function DashboardPage() {
     const slug = editing || slugify(form.name) || `product-${Date.now()}`
     const ratingNum = parseFloat(form.rating) || 5.0
 
-    const selectedGroup = groups.find(g => g.label.toLowerCase() === form.category.toLowerCase() || g.slug === form.category.toLowerCase())
-    const categorySlug = selectedGroup?.slug || slugify(form.category)
-    const subcategorySlug = form.subcategory ? slugify(form.subcategory) : undefined
-    const subcategoryLabel = form.subcategory ? form.subcategory.trim() : undefined
+    const selectedNavGroup = storefrontNavGroups.find(group => group.slug === form.category)
+    const categorySlug = selectedNavGroup?.catalogSlugs.find(slug => groups.some(group => group.slug === slug))
+    if (!selectedNavGroup || !categorySlug) {
+      alert('This category is not connected to an available database category yet. Sync categories and try again.')
+      return
+    }
+    const subcategorySlug = form.subcategory || undefined
+    const subcategoryLabel = selectedNavGroup.items.find(label => slugify(label) === form.subcategory)
 
     const payload = {
       slug,
@@ -513,11 +519,15 @@ export default function DashboardPage() {
         tone: 'bg-secondary',
         items: [],
       }
-      setGroups(c => editingCategory ? c.map(i => i.slug === editingCategory ? { ...i, ...next } : i) : [...c, next])
+      setGroups(current => editingCategory
+        ? current.map(item => item.slug === editingCategory ? { ...item, ...next } : item)
+        : [...current, next])
     }
 
-    setCategoryForm({ label: '', image: '' }); setEditingCategory(null)
-    setSaved(true); setTimeout(() => setSaved(false), 2500)
+    setCategoryForm({ label: '', image: '' })
+    setEditingCategory(null)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
   }
 
   const removeCategory = async (slug: string) => {
@@ -526,7 +536,7 @@ export default function DashboardPage() {
       await apiDeleteCategory(slug)
       await reloadData()
     } catch {
-      setGroups(c => c.filter(i => i.slug !== slug))
+      setGroups(current => current.filter(item => item.slug !== slug))
     }
   }
 
@@ -537,7 +547,8 @@ export default function DashboardPage() {
       await reloadData()
       setAddingSubcategoryTo(null)
       setNewSubcategoryLabel('')
-      setSaved(true); setTimeout(() => setSaved(false), 2500)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
     } catch (err: any) {
       alert(`Error adding subcategory: ${err?.message || 'Unknown error'}`)
     }
@@ -549,13 +560,14 @@ export default function DashboardPage() {
       await apiUpdateSubcategoryLabel(editingSubcategory.slug, editingSubcategory.label.trim())
       await reloadData()
       setEditingSubcategory(null)
-      setSaved(true); setTimeout(() => setSaved(false), 2500)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
     } catch (err: any) {
       alert(`Error updating subcategory: ${err?.message || 'Unknown error'}`)
     }
   }
 
-  const removeSubcategory = async (slug: string, categorySlug: string) => {
+  const removeSubcategory = async (slug: string) => {
     if (!confirm('Remove this subcategory? Products assigned to it will be unaffected but lose their subcategory.')) return
     try {
       await apiRemoveSubcategory(slug)
@@ -869,7 +881,7 @@ export default function DashboardPage() {
                       <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products…" className="h-9 pl-9 text-sm" />
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      {['All', ...groups.map(g => g.label)].map(cat => (
+                      {['All', ...storefrontNavGroups.map(group => group.label)].map(cat => (
                         <button
                           key={cat}
                           type="button"
@@ -947,8 +959,7 @@ export default function DashboardPage() {
           {/* ════════════════════ CATEGORIES ════════════════════ */}
           {view === 'categories' && (
             <div className="grid gap-6 lg:grid-cols-[.75fr_1.25fr]">
-              {/* Category Form */}
-              <Card className="border-border/70 h-fit">
+              <Card className="h-fit border-border/70">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-base">{editingCategory ? 'Edit Category' : 'Add Category'}</CardTitle>
                 </CardHeader>
@@ -956,15 +967,15 @@ export default function DashboardPage() {
                   <form onSubmit={saveCategory} className="space-y-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Category Name</label>
-                      <Input value={categoryForm.label} onChange={e => setCategoryForm({ ...categoryForm, label: e.target.value })} placeholder="e.g. Luxury Skincare" required />
+                      <Input value={categoryForm.label} onChange={event => setCategoryForm({ ...categoryForm, label: event.target.value })} placeholder="e.g. Luxury Skincare" required />
                     </div>
-                    <ImagePicker value={categoryForm.image} onChange={v => setCategoryForm({ ...categoryForm, image: v })} label="Hero Image" />
+                    <ImagePicker value={categoryForm.image} onChange={value => setCategoryForm({ ...categoryForm, image: value })} label="Hero Image" />
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" className="rounded-full text-xs h-8">
+                      <Button type="submit" size="sm" className="h-8 rounded-full text-xs">
                         <Save className="size-3.5" /> {editingCategory ? 'Save Changes' : 'Add Category'}
                       </Button>
                       {editingCategory && (
-                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs h-8" onClick={() => { setEditingCategory(null); setCategoryForm({ label: '', image: '' }) }}>
+                        <Button type="button" variant="ghost" size="sm" className="h-8 rounded-full text-xs" onClick={() => { setEditingCategory(null); setCategoryForm({ label: '', image: '' }) }}>
                           Cancel
                         </Button>
                       )}
@@ -973,19 +984,17 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* Categories + Subcategories List */}
               <Card className="border-border/70">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Categories & Navbar Dropdowns ({groups.length})</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">Each subcategory appears as a link inside the navbar dropdown for that category.</p>
+                  <CardTitle className="text-base">Categories &amp; Navbar Dropdowns ({groups.length})</CardTitle>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Each subcategory appears as a link inside the navbar dropdown for that category.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {groups.map(group => (
                     <div key={group.slug} className="overflow-hidden rounded-xl border border-border/70">
-                      {/* Category Header */}
                       {group.image && (
                         <div className="relative aspect-[4/1] overflow-hidden bg-muted">
-                          <img src={group.image} alt={group.label} className="size-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG }} />
+                          <img src={group.image} alt={group.label} className="size-full object-cover" onError={event => { (event.target as HTMLImageElement).src = FALLBACK_IMG }} />
                           <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
                           <div className="absolute inset-4"><p className="font-serif text-xl text-white">{group.label}</p></div>
                         </div>
@@ -993,8 +1002,8 @@ export default function DashboardPage() {
                       <div className="p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            {!group.image && <p className="font-semibold text-sm">{group.label}</p>}
-                            <p className="text-xs text-muted-foreground mt-0.5">{group.items.length} subcategories in navbar dropdown</p>
+                            {!group.image && <p className="text-sm font-semibold">{group.label}</p>}
+                            <p className="mt-0.5 text-xs text-muted-foreground">{group.items.length} subcategories in navbar dropdown</p>
                           </div>
                           <div className="flex shrink-0 gap-1.5">
                             <Button variant="outline" size="sm" className="h-7 rounded-full text-xs" onClick={() => { setEditingCategory(group.slug); setCategoryForm({ label: group.label, image: group.image }) }}>
@@ -1005,71 +1014,54 @@ export default function DashboardPage() {
                             </Button>
                           </div>
                         </div>
-
-                        {/* Subcategory list */}
                         <div className="mt-3 space-y-1.5">
                           {group.items.map(subLabel => {
                             const subSlug = slugify(subLabel)
-                            const isEditingSub = editingSubcategory?.slug === subSlug
+                            const isEditingSubcategory = editingSubcategory?.slug === subSlug
                             return (
                               <div key={subSlug} className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-                                {isEditingSub ? (
+                                {isEditingSubcategory ? (
                                   <>
                                     <Input
                                       autoFocus
                                       value={editingSubcategory.label}
-                                      onChange={e => setEditingSubcategory({ ...editingSubcategory, label: e.target.value })}
-                                      className="h-7 text-xs flex-1"
-                                      onKeyDown={async e => {
-                                        if (e.key === 'Enter') { e.preventDefault(); await saveSubcategoryEdit() }
-                                        if (e.key === 'Escape') setEditingSubcategory(null)
+                                      onChange={event => setEditingSubcategory({ ...editingSubcategory, label: event.target.value })}
+                                      className="h-7 flex-1 text-xs"
+                                      onKeyDown={async event => {
+                                        if (event.key === 'Enter') { event.preventDefault(); await saveSubcategoryEdit() }
+                                        if (event.key === 'Escape') setEditingSubcategory(null)
                                       }}
                                     />
-                                    <Button size="sm" className="h-7 rounded-full text-xs px-2" onClick={saveSubcategoryEdit}>
-                                      <Check className="size-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="h-7 rounded-full text-xs px-2" onClick={() => setEditingSubcategory(null)}>
-                                      <X className="size-3" />
-                                    </Button>
+                                    <Button size="sm" className="h-7 rounded-full px-2 text-xs" onClick={saveSubcategoryEdit}><Check className="size-3" /></Button>
+                                    <Button variant="ghost" size="sm" className="h-7 rounded-full px-2 text-xs" onClick={() => setEditingSubcategory(null)}><X className="size-3" /></Button>
                                   </>
                                 ) : (
                                   <>
                                     <span className="flex-1 text-xs font-medium">{subLabel}</span>
-                                    <Link href={`/category/${group.slug}/${subSlug}`} target="_blank" className="text-muted-foreground hover:text-accent">
-                                      <ExternalLink className="size-3" />
-                                    </Link>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setEditingSubcategory({ slug: subSlug, label: subLabel, categorySlug: group.slug })}>
-                                      <Settings className="size-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeSubcategory(subSlug, group.slug)}>
-                                      <Trash2 className="size-3" />
-                                    </Button>
+                                    <Link href={`/category/${group.slug}/${subSlug}`} target="_blank" className="text-muted-foreground hover:text-accent"><ExternalLink className="size-3" /></Link>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setEditingSubcategory({ slug: subSlug, label: subLabel, categorySlug: group.slug })}><Settings className="size-3" /></Button>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeSubcategory(subSlug)}><Trash2 className="size-3" /></Button>
                                   </>
                                 )}
                               </div>
                             )
                           })}
 
-                          {/* Add subcategory inline */}
                           {addingSubcategoryTo === group.slug ? (
                             <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2">
                               <Input
                                 autoFocus
                                 value={newSubcategoryLabel}
-                                onChange={e => setNewSubcategoryLabel(e.target.value)}
+                                onChange={event => setNewSubcategoryLabel(event.target.value)}
                                 placeholder="Subcategory name…"
-                                className="h-7 text-xs flex-1"
-                                onKeyDown={async e => {
-                                  if (e.key === 'Enter') { e.preventDefault(); await addSubcategory(group.slug) }
-                                  if (e.key === 'Escape') { setAddingSubcategoryTo(null); setNewSubcategoryLabel('') }
+                                className="h-7 flex-1 text-xs"
+                                onKeyDown={async event => {
+                                  if (event.key === 'Enter') { event.preventDefault(); await addSubcategory(group.slug) }
+                                  if (event.key === 'Escape') { setAddingSubcategoryTo(null); setNewSubcategoryLabel('') }
                                 }}
                               />
-                              <Button size="sm" className="h-7 rounded-full text-xs px-2" onClick={() => addSubcategory(group.slug)}>
-                                <Check className="size-3" />
-                              </Button>
-                              <Button variant="ghost" size="sm" className="h-7 rounded-full text-xs px-2" onClick={() => { setAddingSubcategoryTo(null); setNewSubcategoryLabel('') }}>
-                                <X className="size-3" />
-                              </Button>
+                              <Button size="sm" className="h-7 rounded-full px-2 text-xs" onClick={() => addSubcategory(group.slug)}><Check className="size-3" /></Button>
+                              <Button variant="ghost" size="sm" className="h-7 rounded-full px-2 text-xs" onClick={() => { setAddingSubcategoryTo(null); setNewSubcategoryLabel('') }}><X className="size-3" /></Button>
                             </div>
                           ) : (
                             <button
@@ -1086,7 +1078,7 @@ export default function DashboardPage() {
                   ))}
                 </CardContent>
               </Card>
-            </div>
+              </div>
           )}
 
           {/* ════════════════════ MEDIA LIBRARY ════════════════════ */}
@@ -1107,7 +1099,7 @@ export default function DashboardPage() {
                         required
                       >
                         <option value="">— Select a subcategory —</option>
-                        {groups.map(group => (
+                        {storefrontNavGroups.map(group => (
                           <optgroup key={group.slug} label={group.label}>
                             {group.items.map(subLabel => {
                               const subSlug = slugify(subLabel)
@@ -1428,14 +1420,16 @@ export default function DashboardPage() {
                           update('subcategory', '')
                         }}
                         className="h-9 rounded-md border bg-background px-3 text-sm"
+                        required
                       >
-                        {groups.map(g => <option key={g.slug} value={g.label}>{g.label}</option>)}
+                        <option value="">— Select a category —</option>
+                        {storefrontNavGroups.map(group => <option key={group.slug} value={group.slug}>{group.label}</option>)}
                       </select>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium">Subcategory</label>
                       {(() => {
-                        const matched = groups.find(g => g.label.toLowerCase() === form.category.toLowerCase() || g.slug === form.category.toLowerCase())
+                        const matched = storefrontNavGroups.find(group => group.slug === form.category)
                         const options = matched?.items || []
                         return options.length > 0 ? (
                           <select
@@ -1445,8 +1439,11 @@ export default function DashboardPage() {
                           >
                             <option value="">— None —</option>
                             {options.map(item => (
-                              <option key={item} value={item}>{item}</option>
+                              <option key={slugify(item)} value={slugify(item)}>{item}</option>
                             ))}
+                            {form.subcategory && !options.some(item => slugify(item) === form.subcategory) && (
+                              <option value={form.subcategory}>{form.subcategory}</option>
+                            )}
                           </select>
                         ) : (
                           <p className="text-xs text-muted-foreground italic">No subcategories found for this category.</p>

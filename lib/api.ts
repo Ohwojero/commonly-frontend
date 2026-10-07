@@ -237,6 +237,21 @@ export function apiFetchMedia(): Promise<ApiMediaItem[]> {
   return apiFetch<ApiMediaItem[]>('/categories/media/all')
 }
 
+export async function uploadImageFile(file: File): Promise<string> {
+  const data = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error('Could not read the selected image.'))
+    reader.readAsDataURL(file)
+  })
+  const result = await apiFetch<{ url: string }>('/categories/media/upload', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ fileName: file.name, contentType: file.type, data }),
+  })
+  return result.url
+}
+
 export function apiRemoveMedia(type: string, slug: string): Promise<any> {
   return apiFetch<any>(`/categories/media/${type}/${slug}`, {
     method: 'DELETE',

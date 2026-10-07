@@ -53,6 +53,7 @@ import {
   apiRemoveSubcategory,
   apiFetchMedia,
   apiRemoveMedia,
+  uploadImageFile,
   type ApiMediaItem,
 } from '@/lib/api'
 
@@ -95,22 +96,28 @@ const formatDate = (iso: string) => {
   catch { return iso }
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 // ─── ImagePicker ──────────────────────────────────────────────────────────────
 function ImagePicker({ value, onChange, label = 'Image' }: { value: string; onChange: (v: string) => void; label?: string }) {
   const ref = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    onChange(await fileToBase64(file))
+    e.target.value = ''
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be 5 MB or smaller.')
+      return
+    }
+    setUploading(true)
+    setError('')
+    try {
+      onChange(await uploadImageFile(file))
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
   }
   return (
     <div className="flex flex-col gap-2">
@@ -123,18 +130,19 @@ function ImagePicker({ value, onChange, label = 'Image' }: { value: string; onCh
           <>
             <img src={value} alt="Preview" className="absolute inset-0 size-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG }} />
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition hover:opacity-100">
-              <p className="text-xs font-semibold text-white">Click to change</p>
+              <p className="text-xs font-semibold text-white">{uploading ? 'Uploading…' : 'Click to change'}</p>
             </div>
           </>
         ) : (
           <>
             <Upload className="size-5 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">Click to upload</p>
+            <p className="text-xs text-muted-foreground">{uploading ? 'Uploading to Supabase…' : 'Click to upload'}</p>
           </>
         )}
       </div>
       <Input value={value.startsWith('data:') ? '' : value} onChange={(e) => onChange(e.target.value)} placeholder="Or paste image URL…" className="h-8 text-xs" />
-      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" className="hidden" onChange={handleFile} disabled={uploading} />
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }
@@ -159,8 +167,8 @@ function GalleryImagePicker({ images, onChange }: { images: string[]; onChange: 
     }
 
     try {
-      const encodedImages = await Promise.all(selectedFiles.map(fileToBase64))
-      onChange([...images, ...encodedImages])
+      const uploadedImages = await Promise.all(selectedFiles.map(uploadImageFile))
+      onChange([...images, ...uploadedImages])
       setError(files.length > availableSlots ? 'Only three additional images can be added.' : '')
     } catch {
       setError('Could not read one of the selected images.')

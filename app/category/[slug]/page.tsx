@@ -7,6 +7,9 @@ import { apiCategoryToCategory } from '@/lib/categories'
 
 export const dynamic = 'force-dynamic'
 
+const toSlug = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
 export default async function CategoryPage({
   params,
 }: {
@@ -58,13 +61,13 @@ export default async function CategoryPage({
               </h1>
               <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">{category.description}</p>
               <div className="mt-8 flex flex-wrap gap-2">
-                {(category.subcategories ?? []).map((subcategory) => (
+                {category.items.map((subcategory) => (
                   <Link
-                    key={subcategory.slug}
-                    href={`/category/${category.slug}/${subcategory.slug}`}
+                    key={subcategory}
+                    href={`/category/${category.slug}/${toSlug(subcategory)}`}
                     className="rounded-full border border-border/80 bg-background/80 px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-muted"
                   >
-                    {subcategory.label}
+                    {subcategory}
                   </Link>
                 ))}
               </div>

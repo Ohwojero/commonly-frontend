@@ -1,0 +1,31 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141920" />
+      <stop offset="100%" stop-color="#0A0D10" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D0A9" />
+      <stop offset="100%" stop-color="#C89666" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="180" height="180" rx="42" fill="url(#bgGrad)" />
+  <rect x="2" y="2" width="176" height="176" rx="40" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+
+  <!-- Monogram Letter C -->
+  <text 
+    x="76" 
+    y="126" 
+    font-family="'Playfair Display', Didot, 'Bodoni MT', Georgia, serif" 
+    font-weight="700" 
+    font-size="105" 
+    fill="#FFFFFF" 
+    text-anchor="middle"
+    letter-spacing="-2"
+  >C</text>
+
+  <!-- Editorial Gold Period -->
+  <circle cx="128" cy="118" r="9" fill="url(#goldGrad)" />
+</svg>

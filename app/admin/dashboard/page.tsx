@@ -15,6 +15,7 @@ import {
   ImageIcon,
   LayoutDashboard,
   Loader2,
+  LogOut,
   Menu,
   Package,
   Plus,
@@ -37,6 +38,7 @@ import { Input } from '@/components/ui/input'
 import { type Product } from '@/lib/products'
 import { type Category, apiCategoryToCategory } from '@/lib/categories'
 import { storefrontNavGroups } from '@/lib/storefront-navigation'
+import { useAuth } from '@/lib/auth-store'
 import {
   fetchProducts,
   fetchCategories,
@@ -296,7 +298,11 @@ export default function DashboardPage() {
   const [mediaList, setMediaList] = useState<ApiMediaItem[]>([])
   const [mediaTab, setMediaTab] = useState<'all' | 'Product' | 'Category' | 'Subcategory'>('all')
   const [mediaLoading, setMediaLoading] = useState(false)
+  const { user, logout } = useAuth()
+  const [subImageSaving, setSubImageSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [productSaving, setProductSaving] = useState(false)
+  const [productMessage, setProductMessage] = useState('')
   const [resetConfirm, setResetConfirm] = useState(false)
   const [addingSubcategoryTo, setAddingSubcategoryTo] = useState<string | null>(null)
   const [newSubcategoryLabel, setNewSubcategoryLabel] = useState('')
@@ -439,6 +445,7 @@ export default function DashboardPage() {
 
   const submitProduct = async (e: FormEvent) => {
     e.preventDefault()
+    if (productSaving) return
     const slug = editing || slugify(form.name) || `product-${Date.now()}`
     const ratingNum = parseFloat(form.rating) || 5.0
 
@@ -473,20 +480,23 @@ export default function DashboardPage() {
     }
 
     try {
+      setProductSaving(true)
       if (editing) {
         await apiUpdateProduct(editing, payload)
       } else {
         await apiCreateProduct(payload)
       }
+      setProductMessage(editing ? 'Product updated successfully' : 'Product added successfully')
+      setTimeout(() => setProductMessage(''), 3000)
       await reloadData()
       setForm(emptyProduct)
       setEditing(null)
       setShowProductForm(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
     } catch (err: any) {
       console.error('Failed to save product:', err)
       alert(`Error saving product: ${err?.message || 'Check inputs and ensure API is running'}`)
+    } finally {
+      setProductSaving(false)
     }
   }
 
@@ -588,16 +598,22 @@ export default function DashboardPage() {
   // — Subcategory Image CRUD
   const saveSubImage = async (e: FormEvent) => {
     e.preventDefault()
-    if (!subImageForm.slug || !subImageForm.url) return
+    if (!subImageForm.slug || !subImageForm.url || subImageSaving) return
+    setSubImageSaving(true)
     try {
       await apiUpdateSubcategoryImage(subImageForm.slug, subImageForm.url)
       await reloadMedia()
       await reloadData()
-    } catch {
+      setSubImageForm({ slug: '', url: '' })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (err: any) {
+      console.error('Failed to update subcategory image:', err)
+      alert(`Error saving subcategory image: ${err?.message || 'Check connection'}`)
       setMediaList(prev => prev.map(m => m.slug === subImageForm.slug ? { ...m, url: subImageForm.url } : m))
+    } finally {
+      setSubImageSaving(false)
     }
-    setSubImageForm({ slug: '', url: '' })
-    setSaved(true); setTimeout(() => setSaved(false), 2500)
   }
 
   // — Export helpers
@@ -678,16 +694,33 @@ export default function DashboardPage() {
           ))}
         </nav>
 
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-2">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             onClick={() => setSidebarOpen(false)}
           >
             <Globe className="size-4" />
             View Storefront
             <ExternalLink className="ml-auto size-3 opacity-50" />
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setSidebarOpen(false)
+              logout()
+              window.location.href = '/'
+            }}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <LogOut className="size-4" />
+            <span>Log out</span>
+            {user?.email && (
+              <span className="ml-auto max-w-[90px] truncate text-[11px] text-muted-foreground font-normal">
+                {user.email}
+              </span>
+            )}
+          </button>
         </div>
       </aside>
 
@@ -707,6 +740,11 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {productMessage && (
+                <span role="status" className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  <Check className="size-3" /> {productMessage}
+                </span>
+              )}
               {saved && (
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
                   <Check className="size-3" /> Saved
@@ -736,6 +774,19 @@ export default function DashboardPage() {
               >
                 <Globe className="size-3.5" /> Storefront
               </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-full text-xs gap-1.5 text-destructive border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                onClick={() => {
+                  logout()
+                  window.location.href = '/'
+                }}
+                title={user?.email ? `Signed in as ${user.email}` : 'Log out of admin'}
+              >
+                <LogOut className="size-3.5" />
+                <span>Log out</span>
+              </Button>
             </div>
           </div>
         </header>
@@ -1121,11 +1172,12 @@ export default function DashboardPage() {
                     </div>
                     <ImagePicker value={subImageForm.url} onChange={v => setSubImageForm({ ...subImageForm, url: v })} label="Hero Image" />
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" className="rounded-full text-xs h-8">
-                        <Save className="size-3.5" /> Save Image
+                      <Button type="submit" size="sm" className="rounded-full text-xs h-8" disabled={subImageSaving}>
+                        {subImageSaving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                        {subImageSaving ? 'Saving…' : 'Save Image'}
                       </Button>
                       {subImageForm.slug && (
-                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs h-8" onClick={() => setSubImageForm({ slug: '', url: '' })}>Cancel</Button>
+                        <Button type="button" variant="ghost" size="sm" className="rounded-full text-xs h-8" onClick={() => setSubImageForm({ slug: '', url: '' })} disabled={subImageSaving}>Cancel</Button>
                       )}
                     </div>
                   </form>
@@ -1534,8 +1586,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full rounded-full uppercase tracking-wider text-xs h-11">
-                  <Save className="size-4" /> {editing ? 'Save Changes' : 'Add Product'}
+                <Button type="submit" disabled={productSaving} className="w-full rounded-full uppercase tracking-wider text-xs h-11">
+                  {productSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                  {productSaving ? (editing ? 'Saving Changes…' : 'Adding Product…') : (editing ? 'Save Changes' : 'Add Product')}
                 </Button>
               </form>
             </CardContent>

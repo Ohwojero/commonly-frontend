@@ -39,3 +39,15 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
 
 export const storefrontNavSlug = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+export function getNavGroupBySlug(slug: string): StorefrontNavGroup | undefined {
+  const normalized = slug.toLowerCase().trim()
+  return storefrontNavGroups.find(
+    (g) => g.slug === normalized || g.catalogSlugs.includes(normalized)
+  )
+}
+
+export function resolveCatalogSlugs(slug: string): string[] {
+  const group = getNavGroupBySlug(slug)
+  return group ? group.catalogSlugs : [slug.toLowerCase().trim()]
+}

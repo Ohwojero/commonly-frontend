@@ -4,6 +4,7 @@ import { SiteChrome } from '@/components/site-header'
 import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory, getSubcategoryImage } from '@/lib/categories'
+import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,43 +19,87 @@ export default async function SubcategoryPage({
   const resolvedParams = params instanceof Promise ? await params : params
   const catSlug = decodeURIComponent(resolvedParams?.slug || '').toLowerCase().trim()
   const subSlug = decodeURIComponent(resolvedParams?.subcategory || '').toLowerCase().trim()
+  const navGroup = getNavGroupBySlug(catSlug)
+  const catalogSlugs = resolveCatalogSlugs(catSlug)
 
-  let category
+  let category: ReturnType<typeof apiCategoryToCategory>
   let heroImage = ''
   let item = subSlug
 
   try {
-    const raw = await fetchCategory(catSlug)
-    category = apiCategoryToCategory(raw)
-    heroImage = getSubcategoryImage(subSlug, raw.image)
+    const candidateSlugs = Array.from(new Set([catSlug, ...catalogSlugs]))
+    const fetchedCategories = (
+      await Promise.all(
+        candidateSlugs.map((slugToFetch) => fetchCategory(slugToFetch).catch(() => null))
+      )
+    ).filter(Boolean) as any[]
 
-    // Find matching subcategory label
-    const match = raw.subcategories.find((s) => s.slug === subSlug)
-    if (match) item = match.label
+    const raw = fetchedCategories[0] || (await fetchCategory(catalogSlugs[0]))
+    category = apiCategoryToCategory(raw)
+
+    // Search all candidate categories for this subcategory
+    let foundSub: { label: string; image?: string; slug: string } | undefined
+    for (const cat of fetchedCategories) {
+      const match = cat.subcategories?.find((s: any) => s.slug === subSlug)
+      if (match) {
+        foundSub = match
+        break
+      }
+    }
+
+    if (foundSub) {
+      item = foundSub.label
+      heroImage = foundSub.image || getSubcategoryImage(subSlug, raw.image)
+    } else {
+      if (navGroup) {
+        const navItemMatch = navGroup.items.find((i) => toSlug(i) === subSlug)
+        if (navItemMatch) item = navItemMatch
+      }
+      heroImage = getSubcategoryImage(subSlug, raw.image)
+    }
   } catch {
     category = {
       slug: catSlug,
-      label: catSlug,
+      label: navGroup?.label || catSlug,
       eyebrow: '',
       title: '',
       description: '',
       image: '',
       tone: 'bg-muted/10',
-      items: [],
+      items: navGroup?.items || [],
+      subcategories: [],
     }
     heroImage = getSubcategoryImage(subSlug, '')
+    if (navGroup) {
+      const navItemMatch = navGroup.items.find((i) => toSlug(i) === subSlug)
+      if (navItemMatch) item = navItemMatch
+    }
   }
 
-  // Fetch products filtered by subcategory
-  const rawProducts = await fetchProducts({ category: catSlug, subcategory: subSlug }).catch(() => [])
+  // Fetch products filtered by subcategory across all catalogSlugs
+  const rawProductsArrays = await Promise.all(
+    catalogSlugs.map((cSlug) => fetchProducts({ category: cSlug, subcategory: subSlug }).catch(() => []))
+  )
+  const seenIds = new Set<string>()
+  let rawProducts = rawProductsArrays.flat().filter((p) => {
+    if (seenIds.has(p.id)) return false
+    seenIds.add(p.id)
+    return true
+  })
+
+  // If none found with category filter, fetch by subcategory alone as fallback
+  if (!rawProducts.length) {
+    rawProducts = await fetchProducts({ subcategory: subSlug }).catch(() => [])
+  }
+
   const subcategoryProducts = rawProducts.map((p) => ({
     ...p,
     price: formatPrice(Number(p.price)),
     rating: Number(p.rating).toFixed(1),
-    category: p.subcategory?.category?.label || '',
+    category: p.subcategory?.category?.label || category.label || '',
     categorySlug: p.subcategory?.category?.slug || catSlug,
-    subcategory: p.subcategory?.label,
-    subcategorySlug: p.subcategory?.slug,
+    subcategory: p.subcategory?.label || item,
+    subcategorySlug: p.subcategory?.slug || subSlug,
     prime: !!p.affiliateUrl,
   }))
 

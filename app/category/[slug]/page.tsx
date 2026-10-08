@@ -4,6 +4,7 @@ import { SiteChrome } from '@/components/site-header'
 import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory } from '@/lib/categories'
+import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,26 +18,43 @@ export default async function CategoryPage({
 }) {
   const resolvedParams = params instanceof Promise ? await params : params
   const slug = decodeURIComponent(resolvedParams?.slug || '').toLowerCase().trim()
+  const navGroup = getNavGroupBySlug(slug)
+  const catalogSlugs = resolveCatalogSlugs(slug)
 
-  let category
+  let category: ReturnType<typeof apiCategoryToCategory>
   try {
-    const raw = await fetchCategory(slug)
+    // Try fetching the category directly, or fall back to the first catalogSlug
+    const raw = await fetchCategory(slug).catch(() => fetchCategory(catalogSlugs[0]))
     category = apiCategoryToCategory(raw)
+    if (navGroup) {
+      category.label = navGroup.label
+      if (navGroup.items.length) {
+        category.items = navGroup.items
+      }
+    }
   } catch {
     category = {
       slug,
-      label: slug,
+      label: navGroup?.label || slug,
       eyebrow: '',
       title: 'Curated picks',
-      description: '',
+      description: navGroup?.description || '',
       image: '',
       tone: 'bg-muted/10',
-      items: [],
+      items: navGroup?.items || [],
       subcategories: [],
     }
   }
 
-  const rawProducts = await fetchProducts({ category: slug }).catch(() => [])
+  const rawProductsArrays = await Promise.all(
+    catalogSlugs.map((cSlug) => fetchProducts({ category: cSlug }).catch(() => []))
+  )
+  const seenIds = new Set<string>()
+  const rawProducts = rawProductsArrays.flat().filter((p) => {
+    if (seenIds.has(p.id)) return false
+    seenIds.add(p.id)
+    return true
+  })
   const categoryProducts = rawProducts.map((product) => ({
     ...product,
     price: formatPrice(Number(product.price)),

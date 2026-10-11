@@ -135,14 +135,6 @@ export function RegisterGate({
     }
   }
 
-  const continueDirectlyToAmazon = () => {
-    const url = affiliateUrl ||
-      `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
-    trackAffiliateClick(productSlug)
-    window.open(url, '_blank', 'noopener,noreferrer')
-    handleClose()
-  }
-
   return (
     <>
       {showTrigger && (
@@ -162,7 +154,7 @@ export function RegisterGate({
 
       {mounted && open && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
@@ -170,7 +162,7 @@ export function RegisterGate({
             if (e.target === e.currentTarget) handleClose()
           }}
         >
-          <div className={`relative my-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 p-6 shadow-2xl transition-colors duration-300 sm:p-8 animate-in zoom-in-95 duration-200 ${mode === 'register' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}>
+          <div className={`relative w-full max-w-md rounded-3xl border border-border/80 p-6 shadow-2xl transition-colors duration-300 sm:p-8 animate-in zoom-in-95 duration-200 ${mode === 'register' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}>
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -310,19 +302,6 @@ export function RegisterGate({
                     : 'Log In & View on Amazon'}
               </Button>
             </form>
-
-            {/* Skip / Direct Link Option (if affiliateUrl is present) */}
-            {affiliateUrl && (
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={continueDirectlyToAmazon}
-                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
-                >
-                  Continue directly to Amazon without signing in &rarr;
-                </button>
-              </div>
-            )}
 
             {/* Amazon Associates Compliance Notice */}
             <p className={`mt-5 rounded-xl p-3 text-[10px] leading-relaxed ${mode === 'register' ? 'bg-white/10 text-primary-foreground' : 'bg-muted text-foreground'}`}>

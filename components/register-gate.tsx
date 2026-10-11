@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, Eye, EyeOff, Sparkles, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-store'
+import { trackAffiliateClick } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CountrySelect } from '@/components/ui/country-select'
@@ -29,8 +31,9 @@ export function RegisterGate({
   showTrigger = true,
   initialMode = 'register',
 }: RegisterGateProps) {
-  const { login, register, user } = useAuth()
+  const { login, register, user, token, loading: authLoading } = useAuth()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [internalOpen, setInternalOpen] = useState(false)
   const [mode, setMode] = useState<'register' | 'login'>(initialMode)
   const [form, setForm] = useState({ name: '', email: '', password: '', location: '' })
@@ -38,8 +41,25 @@ export function RegisterGate({
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Consider the user logged-in if we have a token (even while user profile is still loading)
+  const isLoggedIn = !!user || !!token
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
+
+  useEffect(() => {
+    if (open) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [open])
 
   const handleClose = () => {
     if (isControlled && controlledOnClose) {
@@ -48,15 +68,25 @@ export function RegisterGate({
       setInternalOpen(false)
     }
     setMessage('')
+    setMode(initialMode)
     setForm({ name: '', email: '', password: '', location: '' })
   }
 
-  // If already logged in and this is a trigger button, just open Amazon directly
+  // If already logged in (or has a valid session token), go straight to Amazon
   const handleTriggerClick = () => {
-    if (user && affiliateUrl) {
-      window.open(affiliateUrl, '_blank', 'noopener,noreferrer')
+    const hasLocalToken = typeof window !== 'undefined' && !!localStorage.getItem('commonly_token')
+    if (isLoggedIn || hasLocalToken) {
+      // User is logged in — go straight to Amazon
+      const emailForTracking = user?.email
+      const url =
+        affiliateUrl ||
+        `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
+      trackAffiliateClick(productSlug, emailForTracking)
+      window.open(url, '_blank', 'noopener,noreferrer')
       return
     }
+    // Not logged in — ALWAYS open the REGISTER popup first
+    setMode('register')
     if (isControlled && controlledOnClose) return
     setInternalOpen(true)
   }
@@ -67,6 +97,8 @@ export function RegisterGate({
     setLoading(true)
 
     try {
+      let userEmail = form.email
+
       if (mode === 'register') {
         await register(form.email, form.password, form.name || undefined, form.location.trim())
         fetch('/api/activity', {
@@ -88,18 +120,12 @@ export function RegisterGate({
         }
       }
 
-      if (affiliateUrl) {
-        fetch('/api/activity', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            eventType: 'affiliate_click',
-            eventName: 'Outbound Amazon Prime Click',
-            email: form.email || user?.email,
-            productSlug,
-          }),
-        }).catch(() => {})
-        window.open(affiliateUrl, '_blank', 'noopener,noreferrer')
+      // Always redirect to Amazon after successful auth if affiliateUrl exists
+      const url = affiliateUrl ||
+        `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
+      if (productSlug || affiliateUrl) {
+        trackAffiliateClick(productSlug, userEmail, form.location ? form.location.trim() : undefined)
+        window.open(url, '_blank', 'noopener,noreferrer')
       }
       handleClose()
     } catch (err: any) {
@@ -110,18 +136,10 @@ export function RegisterGate({
   }
 
   const continueDirectlyToAmazon = () => {
-    if (affiliateUrl) {
-      fetch('/api/activity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventType: 'affiliate_click',
-          eventName: 'Outbound Amazon Prime Click (Guest)',
-          productSlug,
-        }),
-      }).catch(() => {})
-      window.open(affiliateUrl, '_blank', 'noopener,noreferrer')
-    }
+    const url = affiliateUrl ||
+      `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
+    trackAffiliateClick(productSlug)
+    window.open(url, '_blank', 'noopener,noreferrer')
     handleClose()
   }
 
@@ -131,24 +149,28 @@ export function RegisterGate({
         <Button
           type="button"
           onClick={handleTriggerClick}
+          disabled={authLoading}
           className={
             buttonClassName ||
-            'inline-flex h-14 sm:h-11 items-center justify-center gap-2.5 rounded-full bg-primary px-8 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99]'
+            'inline-flex h-14 sm:h-11 items-center justify-center gap-2.5 rounded-full bg-primary px-8 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait'
           }
         >
-          <span>{buttonLabel}</span>
-          <ExternalLink className="size-4 sm:size-3.5 opacity-80 shrink-0" />
+          <span>{authLoading ? 'Loading...' : buttonLabel}</span>
+          {!authLoading && <ExternalLink className="size-4 sm:size-3.5 opacity-80 shrink-0" />}
         </Button>
       )}
 
-      {open && (
+      {mounted && open && createPortal(
         <div
-          className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleClose()
+          }}
         >
-          <div className={`relative w-full max-w-md rounded-3xl border border-border/80 p-6 shadow-2xl transition-colors duration-300 sm:p-8 animate-in zoom-in-95 duration-200 ${mode === 'register' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}>
+          <div className={`relative my-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 p-6 shadow-2xl transition-colors duration-300 sm:p-8 animate-in zoom-in-95 duration-200 ${mode === 'register' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}>
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -284,12 +306,8 @@ export function RegisterGate({
                 {loading
                   ? 'Connecting...'
                   : mode === 'register'
-                    ? affiliateUrl
-                      ? 'Register & View on Amazon'
-                      : 'Create Account'
-                    : affiliateUrl
-                      ? 'Log In & View on Amazon'
-                      : 'Sign In'}
+                    ? 'Register & View on Amazon'
+                    : 'Log In & View on Amazon'}
               </Button>
             </form>
 
@@ -311,7 +329,8 @@ export function RegisterGate({
               <strong>Amazon Associates Disclosure:</strong> Commonly is an independent editorial curation. As an Amazon Associate, we earn from qualifying purchases at zero extra cost to you.
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

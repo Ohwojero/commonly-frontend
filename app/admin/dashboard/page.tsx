@@ -6,7 +6,9 @@ import {
   Activity,
   AlertCircle,
   ArrowRight,
+  Calendar,
   Check,
+  ChevronDown,
   ChevronRight,
   Download,
   ExternalLink,
@@ -96,6 +98,45 @@ const split = (v: string) => v.split(',').map((p) => p.trim()).filter(Boolean)
 const formatDate = (iso: string) => {
   try { return new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }
   catch { return iso }
+}
+const formatTime = (iso: string) => {
+  try { return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) }
+  catch { return '' }
+}
+const getDateKey = (iso: string) => {
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return 'unknown'
+    return d.toISOString().split('T')[0]
+  } catch {
+    return 'unknown'
+  }
+}
+const formatDayHeading = (dateKey: string) => {
+  if (dateKey === 'unknown') return 'Earlier Activity'
+  try {
+    const [y, m, d] = dateKey.split('-').map(Number)
+    const target = new Date(y, m - 1, d)
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const isToday = target.toDateString() === today.toDateString()
+    const isYesterday = target.toDateString() === yesterday.toDateString()
+
+    const formattedDate = target.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+
+    if (isToday) return `Today · ${formattedDate}`
+    if (isYesterday) return `Yesterday · ${formattedDate}`
+    return formattedDate
+  } catch {
+    return dateKey
+  }
 }
 
 // ─── ImagePicker ──────────────────────────────────────────────────────────────
@@ -379,16 +420,33 @@ export default function DashboardPage() {
   }, [])
 
   // — Activity Fetch
-  const fetchActivity = () => {
+  const fetchActivity = async () => {
     setActivityLoading(true)
     const token = typeof window !== 'undefined' ? localStorage.getItem('commonly_token') : null
-    fetch('/api/activity', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then(r => r.json())
-      .then(data => setActivityItems(Array.isArray(data) ? data : []))
-      .catch(() => setActivityItems([]))
-      .finally(() => setActivityLoading(false))
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
+    try {
+      let res = await fetch('/api/activity', { headers })
+      let data = res.ok ? await res.json() : null
+      if (!Array.isArray(data) && process.env.NEXT_PUBLIC_API_URL) {
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity`, { headers })
+        data = res.ok ? await res.json() : []
+      }
+      setActivityItems(Array.isArray(data) ? data : [])
+    } catch {
+      if (process.env.NEXT_PUBLIC_API_URL) {
+        try {
+          const directRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity`, { headers })
+          const directData = await directRes.json()
+          setActivityItems(Array.isArray(directData) ? directData : [])
+        } catch {
+          setActivityItems([])
+        }
+      } else {
+        setActivityItems([])
+      }
+    } finally {
+      setActivityLoading(false)
+    }
   }
   useEffect(() => { if (view === 'activity' || view === 'overview') fetchActivity() }, [view])
   useEffect(() => { if (view === 'media') reloadMedia() }, [view])
@@ -406,6 +464,57 @@ export default function DashboardPage() {
     const matchesFilter = activityFilter === 'all' || a.eventType === activityFilter
     return matchesQuery && matchesFilter
   }), [activityItems, activityQuery, activityFilter])
+
+  const [openDays, setOpenDays] = useState<Record<string, boolean>>({})
+
+  const groupedActivity = useMemo(() => {
+    const map = new Map<string, ActivityItem[]>()
+    for (const item of filteredActivity) {
+      const key = getDateKey(item.createdAt)
+      const list = map.get(key) || []
+      list.push(item)
+      map.set(key, list)
+    }
+
+    const sortedKeys = Array.from(map.keys()).sort((a, b) => b.localeCompare(a))
+
+    return sortedKeys.map(dateKey => {
+      const dayItems = map.get(dateKey) || []
+      const counts = {
+        total: dayItems.length,
+        login: dayItems.filter(i => i.eventType === 'login').length,
+        register: dayItems.filter(i => i.eventType === 'register').length,
+        affiliate_click: dayItems.filter(i => i.eventType === 'affiliate_click').length,
+      }
+      return {
+        dateKey,
+        label: formatDayHeading(dateKey),
+        items: dayItems,
+        counts,
+      }
+    })
+  }, [filteredActivity])
+
+  const toggleDay = (dateKey: string, index: number) => {
+    setOpenDays(prev => {
+      const isCurrentlyOpen = prev[dateKey] ?? (index === 0)
+      return { ...prev, [dateKey]: !isCurrentlyOpen }
+    })
+  }
+
+  const allExpanded = useMemo(() => {
+    if (groupedActivity.length === 0) return false
+    return groupedActivity.every((g, idx) => openDays[g.dateKey] ?? (idx === 0))
+  }, [groupedActivity, openDays])
+
+  const toggleAllDays = () => {
+    const nextState = !allExpanded
+    const updated: Record<string, boolean> = {}
+    groupedActivity.forEach(g => {
+      updated[g.dateKey] = nextState
+    })
+    setOpenDays(updated)
+  }
 
   const filteredMedia = useMemo(() => {
     return mediaList.filter(item => {
@@ -656,7 +765,7 @@ export default function DashboardPage() {
   const currentNavItem = nav.find(n => n.id === view)
 
   return (
-    <main className="min-h-screen bg-[#F7F7F5]">
+    <main className="min-h-screen bg-[#F7F7F5] overflow-x-hidden">
       {/* ── Mobile Header ─────────────────────────────────────── */}
       <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
         <Link href="/" className="font-serif text-xl">Commonly.</Link>
@@ -713,10 +822,10 @@ export default function DashboardPage() {
             }}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
           >
-            <LogOut className="size-4" />
-            <span>Log out</span>
+            <LogOut className="size-4 shrink-0" />
+            <span className="shrink-0">Log out</span>
             {user?.email && (
-              <span className="ml-auto max-w-[90px] truncate text-[11px] text-muted-foreground font-normal">
+              <span className="ml-auto max-w-[100px] truncate text-[11px] text-muted-foreground font-normal">
                 {user.email}
               </span>
             )}
@@ -727,65 +836,66 @@ export default function DashboardPage() {
       {/* ── Main Content ──────────────────────────────────────── */}
       <div className="md:pl-64">
         {/* Page Header */}
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-sm px-5 py-4 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Admin</span>
-                  <ChevronRight className="size-3 text-muted-foreground/50" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{currentNavItem?.label}</span>
-                </div>
-                <h1 className="mt-0.5 font-serif text-xl">{currentNavItem?.label}</h1>
+        <header className="sticky top-14 md:top-0 z-30 border-b bg-background/95 backdrop-blur-sm px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Admin</span>
+                <ChevronRight className="size-3 text-muted-foreground/50 shrink-0" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground truncate">{currentNavItem?.label}</span>
               </div>
+              <h1 className="mt-0.5 font-serif text-lg sm:text-xl truncate">{currentNavItem?.label}</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {productMessage && (
-                <span role="status" className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span role="status" className="hidden sm:flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                   <Check className="size-3" /> {productMessage}
                 </span>
               )}
               {saved && (
-                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                <span className="hidden sm:flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
                   <Check className="size-3" /> Saved
                 </span>
               )}
               {view === 'catalog' && (
-                <Button size="sm" onClick={() => { setEditing(null); setForm(emptyProduct); setShowProductForm(true) }} className="h-8 rounded-full text-xs">
-                  <Plus className="size-3.5" /> Add Product
+                <Button size="sm" onClick={() => { setEditing(null); setForm(emptyProduct); setShowProductForm(true) }} className="h-8 rounded-full text-xs px-2.5 sm:px-3">
+                  <Plus className="size-3.5" />
+                  <span className="hidden sm:inline">Add Product</span>
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 rounded-full text-xs gap-1.5"
+                className="h-8 rounded-full text-xs gap-1.5 px-2.5 sm:px-3"
                 onClick={reloadData}
                 disabled={dataLoading}
                 title="Fetch latest data from PostgreSQL database"
               >
                 <RefreshCw className={`size-3.5 ${dataLoading ? 'animate-spin' : ''}`} />
-                <span>Sync DB</span>
+                <span className="hidden sm:inline">Sync DB</span>
               </Button>
               <Link
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-xs font-medium whitespace-nowrap transition-all hover:bg-muted hover:text-foreground"
+                className="hidden sm:inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-xs font-medium whitespace-nowrap transition-all hover:bg-muted hover:text-foreground"
+                title="View Storefront"
               >
-                <Globe className="size-3.5" /> Storefront
+                <Globe className="size-3.5" />
+                <span>Storefront</span>
               </Link>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 rounded-full text-xs gap-1.5 text-destructive border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                className="h-8 rounded-full text-xs gap-1.5 px-2.5 sm:px-3 text-destructive border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 shrink-0"
                 onClick={() => {
                   logout()
                   window.location.href = '/'
                 }}
-                title={user?.email ? `Signed in as ${user.email}` : 'Log out of admin'}
+                title={user?.email ? `Signed in as ${user.email} (Click to log out)` : 'Log out of admin'}
               >
                 <LogOut className="size-3.5" />
-                <span>Log out</span>
+                <span className="hidden sm:inline">Log out</span>
               </Button>
             </div>
           </div>
@@ -1331,18 +1441,30 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {/* Filter Tabs */}
-                  <div className="flex gap-1.5 border-b px-5 pb-3">
-                    {[['all', 'All'], ['register', 'Signups'], ['login', 'Logins'], ['affiliate_click', 'Affiliate Clicks']].map(([val, label]) => (
+                  {/* Filter Tabs and Controls */}
+                  <div className="flex items-center justify-between gap-2 border-b px-5 py-3 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap">
+                      {[['all', 'All'], ['register', 'Signups'], ['login', 'Logins'], ['affiliate_click', 'Affiliate Clicks']].map(([val, label]) => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setActivityFilter(val)}
+                          className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${activityFilter === val ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {groupedActivity.length > 1 && (
                       <button
-                        key={val}
                         type="button"
-                        onClick={() => setActivityFilter(val)}
-                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${activityFilter === val ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        onClick={toggleAllDays}
+                        className="rounded-full border border-border/80 bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                       >
-                        {label}
+                        {allExpanded ? 'Collapse all days' : 'Expand all days'}
                       </button>
-                    ))}
+                    )}
                   </div>
 
                   {activityLoading ? (
@@ -1355,21 +1477,90 @@ export default function DashboardPage() {
                       <p className="mt-4 text-sm text-muted-foreground">No activity yet.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-border/50">
-                      {filteredActivity.map(a => (
-                        <div key={a.id} className="flex items-center justify-between gap-4 px-5 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className={`size-2 rounded-full ${a.eventType === 'register' ? 'bg-emerald-500' : a.eventType === 'login' ? 'bg-blue-500' : 'bg-amber-500'}`} />
-                            <div>
-                              <p className="text-sm font-medium">{a.eventName}</p>
-                              <p className="mt-0.5 text-xs text-muted-foreground">
-                                {a.email || 'Guest'}{a.location ? ` · ${a.location}` : ''}{a.productSlug ? ` · ${a.productSlug}` : ''}
-                              </p>
-                            </div>
+                    <div className="divide-y divide-border/60">
+                      {groupedActivity.map((group, groupIdx) => {
+                        const isOpen = openDays[group.dateKey] ?? (groupIdx === 0)
+                        return (
+                          <div key={group.dateKey} className="border-b last:border-b-0 border-border/50">
+                            {/* Daily Accordion Header */}
+                            <button
+                              type="button"
+                              onClick={() => toggleDay(group.dateKey, groupIdx)}
+                              className="flex w-full items-center justify-between gap-3 bg-muted/20 px-5 py-3 hover:bg-muted/40 transition-colors text-left"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0 flex-wrap sm:flex-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="size-3.5 text-muted-foreground shrink-0" />
+                                  <span className="font-semibold text-xs text-foreground tracking-tight">{group.label}</span>
+                                </div>
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                  {group.counts.total} {group.counts.total === 1 ? 'event' : 'events'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 shrink-0">
+                                {/* Event type pills for the day */}
+                                <div className="hidden sm:flex items-center gap-1.5 text-[10px]">
+                                  {group.counts.login > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 px-1.5 py-0.5 text-blue-600 font-medium">
+                                      <span className="size-1.5 rounded-full bg-blue-500" />
+                                      {group.counts.login} {group.counts.login === 1 ? 'login' : 'logins'}
+                                    </span>
+                                  )}
+                                  {group.counts.register > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-emerald-600 font-medium">
+                                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                                      {group.counts.register} {group.counts.register === 1 ? 'signup' : 'signups'}
+                                    </span>
+                                  )}
+                                  {group.counts.affiliate_click > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-amber-600 font-medium">
+                                      <span className="size-1.5 rounded-full bg-amber-500" />
+                                      {group.counts.affiliate_click} {group.counts.affiliate_click === 1 ? 'click' : 'clicks'}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex size-6 items-center justify-center rounded-md text-muted-foreground">
+                                  {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                                </div>
+                              </div>
+                            </button>
+
+                            {/* Accordion Content */}
+                            {isOpen && (
+                              <div className="divide-y divide-border/40 bg-card">
+                                {group.items.map(a => (
+                                  <div key={a.id} className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-muted/10 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <div
+                                        className={`size-2 rounded-full shrink-0 ${
+                                          a.eventType === 'register'
+                                            ? 'bg-emerald-500'
+                                            : a.eventType === 'login'
+                                            ? 'bg-blue-500'
+                                            : 'bg-amber-500'
+                                        }`}
+                                      />
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-medium leading-snug">{a.eventName}</p>
+                                        <p className="mt-0.5 text-xs text-muted-foreground truncate">
+                                          {a.email || 'Guest'}
+                                          {a.location ? ` · ${a.location}` : ''}
+                                          {a.productSlug ? ` · ${a.productSlug}` : ''}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                      <time className="text-[11px] font-medium text-foreground">{formatTime(a.createdAt)}</time>
+                                      <p className="text-[10px] text-muted-foreground">{formatDate(a.createdAt).split(',')[0]}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <time className="shrink-0 text-[11px] text-muted-foreground">{formatDate(a.createdAt)}</time>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </CardContent>

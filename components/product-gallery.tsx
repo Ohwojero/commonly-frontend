@@ -38,6 +38,9 @@ export function ProductGallery({
   relatedProducts?: Product[]
 }) {
   const { user } = useAuth()
+  const effectiveAffiliateUrl =
+    product.affiliateUrl ||
+    `https://www.amazon.com/s?k=${encodeURIComponent(`${product.brand || ''} ${product.name || ''}`.trim())}`
   const images = galleryImages(product)
   const [activeImage, setActiveImage] = useState(0)
   const [reviewsData, setReviewsData] = useState<ApiReviewsResponse | null>(null)
@@ -460,7 +463,7 @@ export function ProductGallery({
                 <div className="flex-1">
                   <RegisterGate
                     productSlug={product.slug}
-                    affiliateUrl={product.affiliateUrl}
+                    affiliateUrl={effectiveAffiliateUrl}
                     buttonLabel="View on Amazon"
                     buttonClassName="w-full inline-flex h-14 sm:h-12 items-center justify-center gap-2.5 rounded-full bg-primary px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99]"
                   />
@@ -531,7 +534,7 @@ export function ProductGallery({
             <div className="shrink-0">
               <RegisterGate
                 productSlug={product.slug}
-                affiliateUrl={product.affiliateUrl}
+                affiliateUrl={effectiveAffiliateUrl}
                 buttonLabel="View on Amazon"
                 buttonClassName="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-md active:scale-95"
               />

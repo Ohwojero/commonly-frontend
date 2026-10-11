@@ -67,7 +67,6 @@ export default async function SubcategoryPage({
       image: '',
       tone: 'bg-muted/10',
       items: navGroup?.items || [],
-      subcategories: [],
     }
     heroImage = getSubcategoryImage(subSlug, '')
     if (navGroup) {

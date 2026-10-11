@@ -351,7 +351,7 @@ export function deleteReview(reviewId: string): Promise<ApiReviewsResponse> {
 // ── Activity ──────────────────────────────────────────────────────────────
 
 export function fetchActivities(): Promise<ApiActivityLog[]> {
-  return apiFetch<ApiActivityLog[]>('/activity')
+  return apiFetch<ApiActivityLog[]>('/activity', { headers: authHeaders() })
 }
 
 export function logActivity(dto: {
@@ -365,4 +365,39 @@ export function logActivity(dto: {
     method: 'POST',
     body: JSON.stringify(dto),
   })
+}
+
+export function trackAffiliateClick(productSlug?: string, email?: string, location?: string): void {
+  const payload = JSON.stringify({
+    eventType: 'affiliate_click',
+    eventName: email ? 'Outbound Amazon Prime Click' : 'Outbound Amazon Prime Click (Guest)',
+    email: email || undefined,
+    location: location || undefined,
+    productSlug: productSlug || undefined,
+  })
+
+  try {
+    fetch('/api/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {
+      fetch(`${BASE}/activity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {})
+    })
+  } catch {
+    try {
+      fetch(`${BASE}/activity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {})
+    } catch {}
+  }
 }

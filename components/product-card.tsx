@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, ExternalLink, Eye, Heart, Star } from 'lucide-react'
+import { ArrowRight, Eye, Heart, Star } from 'lucide-react'
 import type { Product } from '@/lib/products'
 import { toggleSave } from '@/lib/api'
 import { useAuth } from '@/lib/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { RegisterGate } from '@/components/register-gate'
 
 interface ProductCardProps {
   product: Product
@@ -129,15 +130,15 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
 
         {/* Action Button */}
         <div className="mt-3">
-          <a
-            href={product.affiliateUrl || 'https://www.amazon.com/'}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow"
-          >
-            <span>View on Amazon</span>
-            <ExternalLink className="size-3.5 opacity-80" />
-          </a>
+          <RegisterGate
+            productSlug={product.slug}
+            affiliateUrl={
+              product.affiliateUrl ||
+              `https://www.amazon.com/s?k=${encodeURIComponent(`${product.brand || ''} ${product.name || ''}`.trim())}`
+            }
+            buttonLabel="View on Amazon"
+            buttonClassName="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow"
+          />
         </div>
       </CardContent>
 

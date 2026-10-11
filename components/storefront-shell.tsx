@@ -15,13 +15,15 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { fetchProducts, formatPrice, type ApiProduct } from '@/lib/api'
+import { fetchProducts, formatPrice, trackAffiliateClick, type ApiProduct } from '@/lib/api'
+import { useAuth } from '@/lib/auth-store'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { SiteHeader, SiteFooter } from '@/components/site-header'
 import { ProductCard } from '@/components/product-card'
+import { RegisterGate } from '@/components/register-gate'
 import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
 
 // Map ApiProduct to frontend-friendly display shape
@@ -54,6 +56,7 @@ function ProductCardSkeleton() {
 }
 
 export function StorefrontShell() {
+  const { user } = useAuth()
   const [searchOpen, setSearchOpen] = useState(false)
   const [preview, setPreview] = useState<ReturnType<typeof toDisplayProduct> | null>(null)
   const [activeTabKey, setActiveTabKey] = useState('')
@@ -521,15 +524,15 @@ export function StorefrontShell() {
                   ))}
                 </div>
                 <div className="mt-8 flex flex-col gap-2.5 pt-2">
-                  <a
-                    href={preview.affiliateUrl || 'https://www.amazon.com/'}
-                    target="_blank"
-                    rel="noopener noreferrer sponsored"
-                    className="flex h-14 sm:h-11 w-full items-center justify-center gap-2.5 rounded-full bg-primary px-5 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 shadow-md active:scale-[0.99]"
-                  >
-                    <span>View on Amazon</span>
-                    <ExternalLink className="size-4 sm:size-3.5 opacity-80" />
-                  </a>
+                  <RegisterGate
+                    productSlug={preview.slug}
+                    affiliateUrl={
+                      preview.affiliateUrl ||
+                      `https://www.amazon.com/s?k=${encodeURIComponent(`${preview.brand || ''} ${preview.name || ''}`.trim())}`
+                    }
+                    buttonLabel="View on Amazon"
+                    buttonClassName="flex h-14 sm:h-11 w-full items-center justify-center gap-2.5 rounded-full bg-primary px-5 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 shadow-md active:scale-[0.99]"
+                  />
                   <Link
                     href={`/products/${preview.slug}`}
                     onClick={() => setPreview(null)}

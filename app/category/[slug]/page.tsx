@@ -42,7 +42,6 @@ export default async function CategoryPage({
       image: '',
       tone: 'bg-muted/10',
       items: navGroup?.items || [],
-      subcategories: [],
     }
   }
 

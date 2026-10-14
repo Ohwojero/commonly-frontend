@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Check,
-  ChevronDown,
   ChevronRight,
   Heart,
   RotateCcw,
@@ -101,7 +100,6 @@ export function ProductGallery({
       }
     } catch {}
   }
-  const [openSection, setOpenSection] = useState<string | null>('highlights')
   const [zoomPoint, setZoomPoint] = useState({ x: 50, y: 50 })
   const [isZooming, setIsZooming] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -167,26 +165,6 @@ export function ProductGallery({
       }
     })
 
-  const sections = [
-    { id: 'highlights', title: 'Top highlights', rows: toRows(product.highlights, [product.description]) },
-    {
-      id: 'details',
-      title: 'Item details',
-      rows: toRows(product.itemDetails, [
-        `Brand: ${product.brand}`,
-        `Category: ${product.category}`,
-        `Tags: ${product.tags.join(', ')}`,
-      ]),
-    },
-    {
-      id: 'specs',
-      title: 'Features & Specs',
-      rows: toRows(product.specs, [
-        'Materials: Considered clinical & luxury ingredients',
-        'Use: Tested for daily regimen suitability',
-      ]),
-    },
-  ]
 
   return (
     <div className="min-h-screen bg-background pt-24 sm:pt-28">
@@ -419,42 +397,86 @@ export function ProductGallery({
               )}
             </div>
 
-            {/* Accordion Sections: Highlights, Item Details, Specs */}
-            <div id="product-specs-section" className="mt-6 divide-y divide-border border-y border-border">
-              {sections.map((section) => {
-                const isOpen = openSection === section.id
-                return (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => setOpenSection(isOpen ? null : section.id)}
-                    className="block w-full text-left transition-colors hover:bg-muted/15"
-                  >
-                    <div className="flex items-center justify-between gap-4 py-4 text-sm sm:text-base font-semibold text-foreground tracking-tight">
-                      <span>{section.title}</span>
-                      <ChevronDown
-                        className={`size-4.5 text-muted-foreground transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-foreground' : ''
-                        }`}
-                      />
-                    </div>
-                    {isOpen && (
-                      <div className="-mt-1 divide-y divide-border/70 border-t border-border/60 pb-3 pr-2 text-xs sm:text-sm">
-                        <div className="sr-only">{section.title} details</div>
-                        {section.rows.map((row, index) => (
-                          <div
-                            key={`${row.label}-${index}`}
-                            className="grid grid-cols-[minmax(120px,.8fr)_minmax(0,1.5fr)] gap-3 border-border/60 py-2.5 leading-relaxed sm:grid-cols-[minmax(160px,.8fr)_minmax(0,1.5fr)]"
-                          >
-                            <span className="font-semibold text-foreground/90">{row.label}</span>
-                            <span className="text-muted-foreground">{row.value}</span>
-                          </div>
-                        ))}
+            {/* ── Product Description Sections ── */}
+            <div id="product-specs-section" className="mt-6 space-y-4">
+
+              {/* 1. Item Details */}
+              {product.itemDetails && product.itemDetails.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+                  <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Item Details</h3>
+                  </div>
+                  <div className="divide-y divide-border/40 px-4 sm:px-5">
+                    {toRows(product.itemDetails, []).map((row, i) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-[minmax(110px,.8fr)_minmax(0,1.5fr)] gap-3 py-2.5 text-xs sm:text-sm leading-relaxed"
+                      >
+                        <span className="font-semibold text-foreground/80 capitalize">{row.label}</span>
+                        <span className="text-muted-foreground">{row.value}</span>
                       </div>
-                    )}
-                  </button>
-                )
-              })}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Why You Should Buy It */}
+              {product.highlights && product.highlights.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+                  <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
+                  </div>
+                  <ul className="divide-y divide-border/40 px-4 sm:px-5">
+                    {product.highlights.map((item, i) => {
+                      const [label, ...rest] = item.split(':')
+                      const value = rest.length ? rest.join(':').trim() : null
+                      return (
+                        <li key={i} className="flex items-start gap-3 py-2.5 text-xs sm:text-sm leading-relaxed">
+                          <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+                            <Check className="size-2.5 text-emerald-600" />
+                          </span>
+                          <span>
+                            {value ? (
+                              <>
+                                <span className="font-semibold text-foreground">{label.trim()}:</span>{' '}
+                                <span className="text-muted-foreground">{value}</span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">{label.trim()}</span>
+                            )}
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* 3. Who Can Make Use of It */}
+              {product.tags && product.tags.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+                  <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Who Can Make Use of It</h3>
+                  </div>
+                  <div className="px-4 py-4 sm:px-5">
+                    <div className="flex flex-wrap gap-2">
+                      {product.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground shadow-2xs"
+                        >
+                          <span className="size-1.5 rounded-full bg-primary/60" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
 
             {/* Primary Action Area */}

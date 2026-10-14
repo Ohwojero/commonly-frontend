@@ -1745,14 +1745,10 @@ export default function DashboardPage() {
                   <p className="mt-2 text-[11px] text-muted-foreground">The main product image appears first in the review page gallery.</p>
                 </div>
 
-                {/* Description & Tags */}
+                {/* Description */}
                 <div>
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Content & Tags</h3>
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Editorial Description</h3>
                   <div className="space-y-3">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium">Tags (comma separated)</label>
-                      <Input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="Editor Choice, Cult Classic, Prestige Luxury" />
-                    </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium">Description</label>
                       <textarea value={form.description} onChange={e => update('description', e.target.value)} placeholder="Short editorial description of the product…" className="min-h-24 rounded-md border bg-background p-3 text-sm resize-none" />
@@ -1760,20 +1756,67 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Specs */}
-                <div>
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Specifications (comma separated — use Label: Value)</h3>
-                  <div className="grid gap-4">
-                    {[
-                      { key: 'highlights' as const, label: 'Top Highlights', placeholder: 'Key: Value, Key: Value' },
-                      { key: 'itemDetails' as const, label: 'Item Details', placeholder: 'Brand: Name, Size: 30ml' },
-                      { key: 'specs' as const, label: 'Features & Specs', placeholder: 'Packaging: Glass, Application: Morning' },
-                    ].map(({ key, label, placeholder }) => (
-                      <div key={key} className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium">{label}</label>
-                        <textarea value={form[key]} onChange={e => update(key, e.target.value)} placeholder={placeholder} className="min-h-20 rounded-md border bg-background p-3 text-sm resize-none" />
-                      </div>
-                    ))}
+                {/* Product Description Sections */}
+                <div className="space-y-5">
+                  <div>
+                    <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Product Description Sections</h3>
+                    <p className="text-[11px] text-muted-foreground">These 3 sections appear as numbered cards on the product page (no dropdowns).</p>
+                  </div>
+
+                  {/* Section 1 */}
+                  <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
+                      <label className="text-xs font-semibold text-foreground">Item Details</label>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated key-value pairs. Format: <code className="bg-muted px-1 rounded">Label: Value</code></p>
+                    <textarea
+                      value={form.itemDetails}
+                      onChange={e => update('itemDetails', e.target.value)}
+                      placeholder="Brand: Dr. Barbara Sturm, Size: 30ml, Skin Type: All, Origin: Germany"
+                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none"
+                    />
+                  </div>
+
+                  {/* Section 2 */}
+                  <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
+                      <label className="text-xs font-semibold text-foreground">Why You Should Buy It</label>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated bullet points. Format: <code className="bg-muted px-1 rounded">Benefit: Explanation</code> or just a plain phrase.</p>
+                    <textarea
+                      value={form.highlights}
+                      onChange={e => update('highlights', e.target.value)}
+                      placeholder="Dual wavelength: Penetrates deeper skin layers, Medical grade: CE and FDA cleared, Flexible design: Contours to your face"
+                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none"
+                    />
+                  </div>
+
+                  {/* Section 3 */}
+                  <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
+                      <label className="text-xs font-semibold text-foreground">Who Can Make Use of It</label>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated audience tags. These appear as pill badges on the product page.</p>
+                    <textarea
+                      value={form.tags}
+                      onChange={e => update('tags', e.target.value)}
+                      placeholder="Skincare Enthusiasts, Anti-Aging, Sensitive Skin, Dermatologist Recommended"
+                      className="w-full min-h-16 rounded-md border bg-background p-3 text-sm resize-none"
+                    />
+                  </div>
+
+                  {/* Features & Specs (hidden from storefront, internal reference) */}
+                  <div className="rounded-xl border border-dashed border-border/60 bg-transparent p-4 space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground">Features &amp; Specs <span className="font-normal">(internal reference only — not shown on storefront)</span></label>
+                    <textarea
+                      value={form.specs}
+                      onChange={e => update('specs', e.target.value)}
+                      placeholder="Packaging: Glass bottle, Application: Morning and evening, Wavelength: 633nm + 830nm"
+                      className="w-full min-h-16 rounded-md border bg-background p-3 text-sm resize-none"
+                    />
                   </div>
                 </div>
 

@@ -27,9 +27,15 @@ function DropdownGroup({
 }) {
   const [open, setOpen] = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({})
+  const [selectedSubNiche, setSelectedSubNiche] = useState<string | null>(null)
 
   const toggleSub = (subLabel: string) => {
     setMobileExpanded((prev) => ({ ...prev, [subLabel]: !prev[subLabel] }))
+  }
+
+  const handleSubNicheClick = (subLabel: string) => {
+    toggleSub(subLabel)
+    setSelectedSubNiche((prev) => (prev === subLabel ? null : subLabel))
   }
 
   const isFourCols = group.subNiches.length >= 4
@@ -132,31 +138,25 @@ function DropdownGroup({
           {group.subNiches.map((subNiche) => {
             const isExpanded = !!mobileExpanded[subNiche.label]
             const subNicheHref = `/category/${group.slug}/${subNiche.slug}`
-            const isSubActive = isLinkActive(subNicheHref)
+            const isSubActive =
+              selectedSubNiche === subNiche.label ||
+              (selectedSubNiche === null && isLinkActive(subNicheHref))
 
             return (
               <div key={subNiche.label} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
-                  <Link
-                    href={subNicheHref}
-                    onClick={() => handleLinkSelect(subNicheHref)}
-                    className={`inline-flex items-center justify-between gap-1.5 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-all ${
+                <div className="border-b border-border/40 pb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSubNicheClick(subNiche.label)}
+                    className={`inline-flex w-full items-center justify-between gap-1.5 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-all cursor-pointer ${
                       isSubActive
                         ? 'bg-primary text-primary-foreground shadow-xs'
                         : 'text-foreground hover:bg-muted/70 hover:text-accent'
                     }`}
                   >
                     <span>{subNiche.label}</span>
-                    {isSubActive && <ArrowRight className="size-3 text-accent" />}
-                  </Link>
-                  <button
-                    type="button"
-                    className="p-1 text-muted-foreground hover:text-foreground md:hidden"
-                    onClick={() => toggleSub(subNiche.label)}
-                    aria-label={`Toggle ${subNiche.label}`}
-                  >
                     <ChevronDown
-                      className={`size-3.5 transition-transform ${
+                      className={`size-3.5 transition-transform md:hidden ${
                         isExpanded ? 'rotate-180' : ''
                       }`}
                     />

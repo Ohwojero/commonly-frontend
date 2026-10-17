@@ -53,7 +53,7 @@ export const products: Product[] = [
     prime: true,
     isSpotlight: false,
     highlights: ['Proprietary TFC8 trigger factor complex', 'Rich emollient balm texture', 'Diminishes redness and fine lines'],
-    itemDetails: ['Size: 50ml / 1.7 fl oz', 'Recyclable packaging'],
+    itemDetails: ['Size: 50ml / 1.7 fl oz', 'Packaging: Recyclable luxury glass jar'],
     specs: ['Use: Morning and evening', 'Dermatologist verified'],
   },
   {
@@ -76,7 +76,7 @@ export const products: Product[] = [
     prime: true,
     isSpotlight: true,
     highlights: ['Dual matrix Red (633nm) & Near-Infrared (830nm)', 'Medical CE & FDA cleared', 'Flexible silicone ergonomic fit'],
-    itemDetails: ['132 medical-grade LEDs', 'Rechargeable controller'],
+    itemDetails: ['Technology: 132 Medical-Grade LEDs (633nm + 830nm)', 'Power: Rechargeable controller with USB-C'],
     specs: ['Optical output: 30mW/cm²', '10-minute auto timer'],
   },
   {
@@ -99,7 +99,7 @@ export const products: Product[] = [
     prime: true,
     isSpotlight: false,
     highlights: ['Transparent Zinc Oxide 9.0%', 'Calming 5.0% Niacinamide', 'Weightless residue-free finish'],
-    itemDetails: ['Size: 1.7 oz airless pump', 'Oil-free formulation'],
+    itemDetails: ['Size: 1.7 oz airless pump', 'Formula: Oil-free & fragrance-free'],
     specs: ['Finish: Sheer silky matte', 'Broad spectrum UVA/UVB'],
   },
 
@@ -241,7 +241,7 @@ export const products: Product[] = [
     prime: true,
     isSpotlight: false,
     highlights: ['8000 DPI Darkfield sensor', 'Quiet click switches', 'MagSpeed electromagnetic wheel'],
-    itemDetails: ['Connection: Bluetooth Low Energy & Logi Bolt', 'Rechargeable USB-C'],
+    itemDetails: ['Connection: Bluetooth Low Energy & Logi Bolt', 'Battery: Rechargeable USB-C fast charge'],
     specs: ['Battery: Up to 70 days per charge', 'Customizable buttons: 7'],
   },
 ]

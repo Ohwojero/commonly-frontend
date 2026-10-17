@@ -158,10 +158,18 @@ export function ProductGallery({
 
   const toRows = (items: string[] | undefined, fallback: string[]) =>
     (items?.length ? items : fallback).map((item) => {
-      const [label, ...value] = item.split(':')
+      const idx = item.indexOf(':')
+      if (idx !== -1) {
+        return {
+          hasLabel: true,
+          label: item.slice(0, idx).trim(),
+          value: item.slice(idx + 1).trim(),
+        }
+      }
       return {
-        label: value.length ? label.trim() : 'Details',
-        value: (value.length ? value.join(':') : item).trim(),
+        hasLabel: false,
+        label: '',
+        value: item.trim(),
       }
     })
 
@@ -411,10 +419,20 @@ export function ProductGallery({
                     {toRows(product.itemDetails, []).map((row, i) => (
                       <div
                         key={i}
-                        className="grid grid-cols-[minmax(110px,.8fr)_minmax(0,1.5fr)] gap-3 py-2.5 text-xs sm:text-sm leading-relaxed"
+                        className={
+                          row.hasLabel
+                            ? 'grid grid-cols-[110px_1fr] sm:grid-cols-[140px_1fr] gap-3 sm:gap-4 py-2.5 text-xs sm:text-sm leading-relaxed items-start'
+                            : 'py-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground'
+                        }
                       >
-                        <span className="font-semibold text-foreground/80 capitalize">{row.label}</span>
-                        <span className="text-muted-foreground">{row.value}</span>
+                        {row.hasLabel ? (
+                          <>
+                            <span className="font-semibold text-foreground/80 capitalize">{row.label}</span>
+                            <span className="text-muted-foreground">{row.value}</span>
+                          </>
+                        ) : (
+                          <span>{row.value}</span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -640,14 +658,15 @@ export function ProductGallery({
               </div>
             )
           ) : (
-            <div className="mb-8 rounded-2xl border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
+            <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 sm:p-5 text-sm text-muted-foreground">
               <button
+                type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('commonly:open-auth'))}
-                className="text-foreground font-medium underline underline-offset-2 hover:text-primary transition-colors"
+                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-xs transition-all duration-200 hover:bg-primary/90 active:scale-95"
               >
                 Sign in
-              </button>{' '}
-              to leave a review.
+              </button>
+              <span>to leave a review.</span>
             </div>
           )}
 

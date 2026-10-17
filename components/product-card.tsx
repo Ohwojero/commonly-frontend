@@ -159,10 +159,10 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
 
         <Link
           href={`/products/${product.slug}`}
-          className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-accent"
+          className="group inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[11px] font-medium text-secondary-foreground border border-border/80 shadow-2xs transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:border-primary active:scale-95"
         >
-          <span>Read review</span>
-          <ArrowRight className="size-3" />
+          <span>Read Review</span>
+          <ArrowRight className="size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
 
         <span

@@ -5,6 +5,7 @@ import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory, getSubcategoryImage } from '@/lib/categories'
 import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
+import { products as fallbackProducts } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,26 +53,34 @@ export default async function SubcategoryPage({
       heroImage = foundSub.image || getSubcategoryImage(subSlug, raw.image)
     } else {
       if (navGroup) {
+        const subNicheMatch = navGroup.subNiches.find(
+          (sn) => sn.slug === subSlug || toSlug(sn.label) === subSlug
+        )
         const navItemMatch = navGroup.items.find((i) => toSlug(i) === subSlug)
-        if (navItemMatch) item = navItemMatch
+        if (subNicheMatch) item = subNicheMatch.label
+        else if (navItemMatch) item = navItemMatch
       }
-      heroImage = getSubcategoryImage(subSlug, raw.image)
+      heroImage = getSubcategoryImage(subSlug, raw?.image || navGroup?.image || '')
     }
   } catch {
     category = {
       slug: catSlug,
       label: navGroup?.label || catSlug,
-      eyebrow: '',
-      title: '',
-      description: '',
-      image: '',
+      eyebrow: navGroup?.eyebrow || 'Curated Edit',
+      title: navGroup?.tagline || '',
+      description: navGroup?.description || '',
+      image: navGroup?.image || '',
       tone: 'bg-muted/10',
       items: navGroup?.items || [],
     }
-    heroImage = getSubcategoryImage(subSlug, '')
+    heroImage = getSubcategoryImage(subSlug, navGroup?.image || '')
     if (navGroup) {
+      const subNicheMatch = navGroup.subNiches.find(
+        (sn) => sn.slug === subSlug || toSlug(sn.label) === subSlug
+      )
       const navItemMatch = navGroup.items.find((i) => toSlug(i) === subSlug)
-      if (navItemMatch) item = navItemMatch
+      if (subNicheMatch) item = subNicheMatch.label
+      else if (navItemMatch) item = navItemMatch
     }
   }
 
@@ -91,7 +100,7 @@ export default async function SubcategoryPage({
     rawProducts = await fetchProducts({ subcategory: subSlug }).catch(() => [])
   }
 
-  const subcategoryProducts = rawProducts.map((p) => ({
+  let subcategoryProducts = rawProducts.map((p) => ({
     ...p,
     price: formatPrice(Number(p.price)),
     rating: Number(p.rating).toFixed(1),
@@ -101,6 +110,24 @@ export default async function SubcategoryPage({
     subcategorySlug: p.subcategory?.slug || subSlug,
     prime: !!p.affiliateUrl,
   }))
+
+  if (!subcategoryProducts.length) {
+    subcategoryProducts = fallbackProducts.filter((fp) => {
+      const matchCat =
+        catalogSlugs.includes(fp.categorySlug || '') || fp.categorySlug === catSlug
+      const matchSub =
+        fp.subcategorySlug === subSlug ||
+        toSlug(fp.subcategory || '') === subSlug ||
+        (navGroup &&
+          navGroup.subNiches.some(
+            (sn) =>
+              (sn.slug === subSlug || toSlug(sn.label) === subSlug) &&
+              (sn.slug === fp.subcategorySlug ||
+                sn.items.some((i) => toSlug(i) === fp.subcategorySlug))
+          ))
+      return matchCat && matchSub
+    }) as any
+  }
 
   return (
     <SiteChrome>

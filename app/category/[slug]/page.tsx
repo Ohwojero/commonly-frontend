@@ -5,6 +5,7 @@ import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory } from '@/lib/categories'
 import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
+import { products as fallbackProducts } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +29,10 @@ export default async function CategoryPage({
     category = apiCategoryToCategory(raw)
     if (navGroup) {
       category.label = navGroup.label
+      if (navGroup.eyebrow) category.eyebrow = navGroup.eyebrow
+      if (navGroup.tagline) category.title = navGroup.tagline
+      if (navGroup.description) category.description = navGroup.description
+      if (navGroup.image) category.image = navGroup.image
       if (navGroup.items.length) {
         category.items = navGroup.items
       }
@@ -36,10 +41,10 @@ export default async function CategoryPage({
     category = {
       slug,
       label: navGroup?.label || slug,
-      eyebrow: '',
-      title: 'Curated picks',
+      eyebrow: navGroup?.eyebrow || 'Curated Edit',
+      title: navGroup?.tagline || 'Curated Workspace & Ritual Picks',
       description: navGroup?.description || '',
-      image: '',
+      image: navGroup?.image || '',
       tone: 'bg-muted/10',
       items: navGroup?.items || [],
     }
@@ -54,7 +59,7 @@ export default async function CategoryPage({
     seenIds.add(p.id)
     return true
   })
-  const categoryProducts = rawProducts.map((product) => ({
+  let categoryProducts = rawProducts.map((product) => ({
     ...product,
     price: formatPrice(Number(product.price)),
     rating: Number(product.rating).toFixed(1),
@@ -65,6 +70,12 @@ export default async function CategoryPage({
     subcategorySlug: product.subcategory?.slug,
     prime: !!product.affiliateUrl,
   }))
+
+  if (!categoryProducts.length) {
+    categoryProducts = fallbackProducts.filter(
+      (fp) => catalogSlugs.includes(fp.categorySlug || '') || fp.categorySlug === slug
+    ) as any
+  }
 
   return (
     <SiteChrome>

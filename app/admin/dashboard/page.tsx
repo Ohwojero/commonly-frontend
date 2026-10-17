@@ -17,6 +17,7 @@ import {
   ImageIcon,
   LayoutDashboard,
   Loader2,
+  Lock,
   LogOut,
   Menu,
   Package,
@@ -70,7 +71,7 @@ const STORAGE_KEYS = {
 const FALLBACK_IMG = '/luxury-placeholder.svg'
 
 const emptyProduct: ProductForm = {
-  name: '', brand: '', category: 'luxury-skincare', subcategory: '',
+  name: '', brand: '', category: 'personal-edit', subcategory: '',
   image: '', images: [], affiliateUrl: '', description: '',
   highlights: '', itemDetails: '', specs: '', tags: '',
   rating: '5.0', views: '0',
@@ -314,6 +315,124 @@ function StatCard({ label, value, icon: Icon, trend, accent = false }: { label: 
   )
 }
 
+// ─── Admin Login Gate ────────────────────────────────────────────────────────
+function AdminLoginGate({ onLoginSuccess }: { onLoginSuccess: () => void }) {
+  const { user, login, logout } = useAuth()
+  const [email, setEmail] = useState('admin@commonly.com')
+  const [password, setPassword] = useState('admin123')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      const role = await login(email.trim(), password)
+      if (role !== 'admin') {
+        setError('This account does not have administrator privileges. Please log in with an admin account.')
+      } else {
+        onLoginSuccess()
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Invalid administrator credentials. Please check your email and password.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-[#F7F7F5] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl border-border/80 bg-background">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground mb-3 shadow-md">
+            <Lock className="size-6" />
+          </div>
+          <CardTitle className="font-serif text-2xl tracking-tight">Admin Authorization</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+            Administrator credentials are required to add products, modify catalog entries, and manage store assets.
+          </p>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {user && user.role !== 'admin' && (
+            <div className="mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-700">
+              <p className="font-medium">Currently signed in as: {user.email}</p>
+              <p className="mt-0.5 opacity-80">This account has standard &quot;user&quot; role. Please sign in with an administrator account.</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={logout}
+                className="mt-2 h-7 text-[11px] rounded-full"
+              >
+                Log out
+              </Button>
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive">
+              <AlertCircle className="size-4 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Admin Email
+              </label>
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@commonly.com"
+                className="h-10 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Password
+              </label>
+              <Input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-10 text-sm"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 rounded-full text-xs font-semibold uppercase tracking-widest gap-2 shadow-sm"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  <span>Authorizing...</span>
+                </>
+              ) : (
+                <span>Sign In to Admin</span>
+              )}
+            </Button>
+            <div className="mt-4 rounded-xl border border-dashed border-border p-3 bg-muted/30 text-center">
+              <p className="text-[11px] text-muted-foreground">
+                Default Credentials: <strong className="text-foreground">admin@commonly.com</strong> / <strong className="text-foreground">admin123</strong>
+              </p>
+            </div>
+          </form>
+          <div className="mt-4 text-center">
+            <Link href="/" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+              ← Return to Storefront
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  )
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   // — State
@@ -339,7 +458,7 @@ export default function DashboardPage() {
   const [mediaList, setMediaList] = useState<ApiMediaItem[]>([])
   const [mediaTab, setMediaTab] = useState<'all' | 'Product' | 'Category' | 'Subcategory'>('all')
   const [mediaLoading, setMediaLoading] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, logout, loading: authLoading } = useAuth()
   const [subImageSaving, setSubImageSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [productSaving, setProductSaving] = useState(false)
@@ -559,13 +678,20 @@ export default function DashboardPage() {
     const ratingNum = parseFloat(form.rating) || 5.0
 
     const selectedNavGroup = storefrontNavGroups.find(group => group.slug === form.category)
-    const categorySlug = selectedNavGroup?.catalogSlugs.find(slug => groups.some(group => group.slug === slug))
-    if (!selectedNavGroup || !categorySlug) {
-      alert('This category is not connected to an available database category yet. Sync categories and try again.')
-      return
-    }
+    const categorySlug =
+      groups.find(group => group.slug === form.category)?.slug ||
+      selectedNavGroup?.catalogSlugs.find(slug => groups.some(group => group.slug === slug)) ||
+      groups[0]?.slug ||
+      form.category ||
+      'personal-edit'
+
     const subcategorySlug = form.subcategory || undefined
-    const subcategoryLabel = selectedNavGroup.items.find(label => slugify(label) === form.subcategory)
+    const subcategoryLabel =
+      selectedNavGroup?.subNiches
+        ?.flatMap(sn => sn.items)
+        .find(label => slugify(label) === form.subcategory) ||
+      selectedNavGroup?.items.find(label => slugify(label) === form.subcategory) ||
+      form.subcategory
 
     const payload = {
       slug,
@@ -603,7 +729,16 @@ export default function DashboardPage() {
       setShowProductForm(false)
     } catch (err: any) {
       console.error('Failed to save product:', err)
-      alert(`Error saving product: ${err?.message || 'Check inputs and ensure API is running'}`)
+      const isAuthError =
+        err?.message?.toLowerCase().includes('unauthorized') ||
+        err?.message?.includes('401') ||
+        err?.message?.toLowerCase().includes('forbidden') ||
+        err?.message?.includes('403')
+      if (isAuthError) {
+        alert('Unauthorized: You must be logged in as an administrator (admin@commonly.com) to save or modify products.')
+      } else {
+        alert(`Error saving product: ${err?.message || 'Check inputs and ensure API is running'}`)
+      }
     } finally {
       setProductSaving(false)
     }
@@ -763,6 +898,23 @@ export default function DashboardPage() {
   ]
 
   const currentNavItem = nav.find(n => n.id === view)
+
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#F7F7F5]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="size-8 animate-spin text-primary" />
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+            Checking administrator session...
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  if (!user || user.role !== 'admin') {
+    return <AdminLoginGate onLoginSuccess={reloadData} />
+  }
 
   return (
     <main className="min-h-screen bg-[#F7F7F5] overflow-x-hidden">
@@ -1689,9 +1841,19 @@ export default function DashboardPage() {
                             className="h-9 rounded-md border bg-background px-3 text-sm"
                           >
                             <option value="">— None —</option>
-                            {options.map(item => (
-                              <option key={slugify(item)} value={slugify(item)}>{item}</option>
-                            ))}
+                            {matched?.subNiches?.length ? (
+                              matched.subNiches.map(sn => (
+                                <optgroup key={sn.label} label={sn.label}>
+                                  {sn.items.map(item => (
+                                    <option key={slugify(item)} value={slugify(item)}>{item}</option>
+                                  ))}
+                                </optgroup>
+                              ))
+                            ) : (
+                              options.map(item => (
+                                <option key={slugify(item)} value={slugify(item)}>{item}</option>
+                              ))
+                            )}
                             {form.subcategory && !options.some(item => slugify(item) === form.subcategory) && (
                               <option value={form.subcategory}>{form.subcategory}</option>
                             )}

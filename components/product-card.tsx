@@ -27,7 +27,7 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
 
     if (!user) {
       // Show auth modal via a custom event (picked up by SiteHeader)
-      window.dispatchEvent(new CustomEvent('commonly:open-auth'))
+      window.dispatchEvent(new CustomEvent('commonlys:open-auth'))
       return
     }
 

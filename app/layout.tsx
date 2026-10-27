@@ -5,7 +5,7 @@ import { CookieBanner } from '@/components/cookie-banner'
 import { AuthProvider } from '@/lib/auth-store'
 
 export const metadata: Metadata = {
-  title: 'Commonly. — Prestige Beauty & Clinical Technology',
+  title: 'Commonlys. — Prestige Beauty & Clinical Technology',
   description: 'An independent editorial curation of molecular skincare, salon-grade hair technology, and FDA-cleared clinical devices.',
   icons: {
     icon: [

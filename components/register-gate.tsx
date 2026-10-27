@@ -74,7 +74,9 @@ export function RegisterGate({
 
   // If already logged in (or has a valid session token), go straight to Amazon
   const handleTriggerClick = () => {
-    const hasLocalToken = typeof window !== 'undefined' && !!localStorage.getItem('commonly_token')
+    const hasLocalToken =
+      typeof window !== 'undefined' &&
+      !!(localStorage.getItem('commonlys_token') || localStorage.getItem('commonly_token'))
     if (isLoggedIn || hasLocalToken) {
       // User is logged in — go straight to Amazon
       const emailForTracking = user?.email
@@ -168,7 +170,7 @@ export function RegisterGate({
               <div>
                 <p className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] ${mode === 'register' ? 'text-primary-foreground/80' : 'text-accent'}`}>
                   <Sparkles className="size-3.5" />
-                  {affiliateUrl ? 'Prestige Curations' : 'Commonly Account'}
+                  {affiliateUrl ? 'Prestige Curations' : 'Commonlys Account'}
                 </p>
                 <h2 id="auth-modal-title" className="mt-2 font-serif text-2xl sm:text-3xl">
                   {mode === 'register'
@@ -177,7 +179,7 @@ export function RegisterGate({
                       : 'Create your account'
                     : affiliateUrl
                       ? 'Welcome back'
-                      : 'Sign in to Commonly'}
+                      : 'Sign in to Commonlys'}
                 </h2>
                 <p className={`mt-1.5 max-w-[34ch] text-sm leading-relaxed ${mode === 'register' ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {mode === 'register'
@@ -305,7 +307,7 @@ export function RegisterGate({
 
             {/* Amazon Associates Compliance Notice */}
             <p className={`mt-5 rounded-xl p-3 text-[10px] leading-relaxed ${mode === 'register' ? 'bg-white/10 text-primary-foreground' : 'bg-muted text-foreground'}`}>
-              <strong>Amazon Associates Disclosure:</strong> Commonly is an independent editorial curation. As an Amazon Associate, we earn from qualifying purchases at zero extra cost to you.
+              <strong>Amazon Associates Disclosure:</strong> Commonlys is an independent editorial curation. As an Amazon Associate, we earn from qualifying purchases at zero extra cost to you.
             </p>
           </div>
         </div>,

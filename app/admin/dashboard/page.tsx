@@ -64,9 +64,9 @@ import {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const STORAGE_KEYS = {
-  products: 'commonly-products',
-  categories: 'commonly-categories',
-  subImages: 'commonly-subcategory-images',
+  products: 'commonlys-products',
+  categories: 'commonlys-categories',
+  subImages: 'commonlys-subcategory-images',
 }
 const FALLBACK_IMG = '/luxury-placeholder.svg'
 
@@ -318,7 +318,7 @@ function StatCard({ label, value, icon: Icon, trend, accent = false }: { label: 
 // ─── Admin Login Gate ────────────────────────────────────────────────────────
 function AdminLoginGate({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   const { user, login, logout } = useAuth()
-  const [email, setEmail] = useState('admin@commonly.com')
+  const [email, setEmail] = useState('admin@commonlys.com')
   const [password, setPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -385,7 +385,7 @@ function AdminLoginGate({ onLoginSuccess }: { onLoginSuccess: () => void }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@commonly.com"
+                placeholder="admin@commonlys.com"
                 className="h-10 text-sm"
               />
             </div>
@@ -418,7 +418,7 @@ function AdminLoginGate({ onLoginSuccess }: { onLoginSuccess: () => void }) {
             </Button>
             <div className="mt-4 rounded-xl border border-dashed border-border p-3 bg-muted/30 text-center">
               <p className="text-[11px] text-muted-foreground">
-                Default Credentials: <strong className="text-foreground">admin@commonly.com</strong> / <strong className="text-foreground">admin123</strong>
+                Default Credentials: <strong className="text-foreground">admin@commonlys.com</strong> / <strong className="text-foreground">admin123</strong>
               </p>
             </div>
           </form>
@@ -541,7 +541,10 @@ export default function DashboardPage() {
   // — Activity Fetch
   const fetchActivity = async () => {
     setActivityLoading(true)
-    const token = typeof window !== 'undefined' ? localStorage.getItem('commonly_token') : null
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('commonlys_token') || localStorage.getItem('commonly_token')
+        : null
     const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
     try {
       let res = await fetch('/api/activity', { headers })
@@ -735,7 +738,7 @@ export default function DashboardPage() {
         err?.message?.toLowerCase().includes('forbidden') ||
         err?.message?.includes('403')
       if (isAuthError) {
-        alert('Unauthorized: You must be logged in as an administrator (admin@commonly.com) to save or modify products.')
+        alert('Unauthorized: You must be logged in as an administrator (admin@commonlys.com) to save or modify products.')
       } else {
         alert(`Error saving product: ${err?.message || 'Check inputs and ensure API is running'}`)
       }
@@ -873,7 +876,7 @@ export default function DashboardPage() {
     const lines = rows.map(r => [r.id, r.eventType, r.eventName, r.email || '', r.location || '', r.productSlug || '', r.createdAt].map(v => `"${v}"`).join(','))
     const blob = new Blob([[headers.join(','), ...lines].join('\n')], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
-    Object.assign(document.createElement('a'), { href: url, download: 'commonly-activity.csv' }).click()
+    Object.assign(document.createElement('a'), { href: url, download: 'commonlys-activity.csv' }).click()
     URL.revokeObjectURL(url)
   }
 
@@ -920,7 +923,7 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-[#F7F7F5] overflow-x-hidden">
       {/* ── Mobile Header ─────────────────────────────────────── */}
       <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
-        <Link href="/" className="font-serif text-xl">Commonly.</Link>
+        <Link href="/" className="font-serif text-xl">Commonlys.</Link>
         <button type="button" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
           <Menu className="size-5" />
         </button>
@@ -930,7 +933,7 @@ export default function DashboardPage() {
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background transition-transform duration-200 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:block`}>
         <div className="flex h-16 items-center justify-between border-b px-6">
-          <Link href="/" className="font-serif text-2xl" onClick={() => setSidebarOpen(false)}>Commonly.</Link>
+          <Link href="/" className="font-serif text-2xl" onClick={() => setSidebarOpen(false)}>Commonlys.</Link>
           <button type="button" className="md:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="size-4" />
           </button>
@@ -1224,7 +1227,7 @@ export default function DashboardPage() {
                     {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
                   </CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="h-8 rounded-full text-xs" onClick={() => exportJson(items, 'commonly-catalog.json')}>
+                    <Button variant="outline" size="sm" className="h-8 rounded-full text-xs" onClick={() => exportJson(items, 'commonlys-catalog.json')}>
                       <Download className="size-3.5" /> Export JSON
                     </Button>
                     <Button size="sm" className="h-8 rounded-full text-xs" onClick={() => { setEditing(null); setForm(emptyProduct); setShowProductForm(true) }}>
@@ -1732,13 +1735,13 @@ export default function DashboardPage() {
                     Your product catalog, categories, and media library are stored locally in this browser and are immediately reflected on the public storefront.
                   </p>
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(items, 'commonly-products.json')}>
+                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(items, 'commonlys-products.json')}>
                       <Download className="size-3.5" /> Export Products JSON
                     </Button>
-                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(groups, 'commonly-categories.json')}>
+                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(groups, 'commonlys-categories.json')}>
                       <Download className="size-3.5" /> Export Categories JSON
                     </Button>
-                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(subImages, 'commonly-media.json')}>
+                    <Button variant="outline" size="sm" className="rounded-full text-xs h-8" onClick={() => exportJson(subImages, 'commonlys-media.json')}>
                       <Download className="size-3.5" /> Export Media JSON
                     </Button>
                   </div>

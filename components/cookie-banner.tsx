@@ -10,7 +10,9 @@ export function CookieBanner() {
 
   useEffect(() => {
     // Check if user has already made a cookie choice
-    const consent = localStorage.getItem('commonly_cookie_consent')
+    const consent =
+      localStorage.getItem('commonlys_cookie_consent') ||
+      localStorage.getItem('commonly_cookie_consent')
     if (!consent) {
       // Delay slightly for smooth entrance
       const timer = setTimeout(() => setVisible(true), 1200)
@@ -19,12 +21,12 @@ export function CookieBanner() {
   }, [])
 
   const handleAccept = () => {
-    localStorage.setItem('commonly_cookie_consent', 'accepted')
+    localStorage.setItem('commonlys_cookie_consent', 'accepted')
     setVisible(false)
   }
 
   const handleDecline = () => {
-    localStorage.setItem('commonly_cookie_consent', 'declined')
+    localStorage.setItem('commonlys_cookie_consent', 'declined')
     setVisible(false)
   }
 

@@ -28,12 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // On mount, restore session from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('commonly_token')
+    const stored =
+      localStorage.getItem('commonlys_token') || localStorage.getItem('commonly_token')
     if (stored) {
       setToken(stored)
       apiGetMe()
         .then((me) => setUser(me))
         .catch(() => {
+          localStorage.removeItem('commonlys_token')
           localStorage.removeItem('commonly_token')
           setToken(null)
         })
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<string> => {
     const res = await apiLogin(email, password)
-    localStorage.setItem('commonly_token', res.access_token)
+    localStorage.setItem('commonlys_token', res.access_token)
     setToken(res.access_token)
     setUser({ id: res.user.id, email: res.user.email, name: res.user.name, location: res.user.location, role: res.user.role, createdAt: new Date().toISOString() })
     return res.user.role
@@ -53,13 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name: string | undefined, location: string): Promise<string> => {
     const res = await apiRegister(email, password, name, location)
-    localStorage.setItem('commonly_token', res.access_token)
+    localStorage.setItem('commonlys_token', res.access_token)
     setToken(res.access_token)
     setUser({ id: res.user.id, email: res.user.email, name: res.user.name, location: res.user.location, role: res.user.role, createdAt: new Date().toISOString() })
     return res.user.role
   }
 
   const logout = () => {
+    localStorage.removeItem('commonlys_token')
     localStorage.removeItem('commonly_token')
     setToken(null)
     setUser(null)

@@ -654,7 +654,7 @@ export function StorefrontShell() {
             {emailSubscribed ? (
               <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-6 py-2.5 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
                 <CheckCircle2 className="size-4" />
-                You&apos;re on the list! Welcome to Commonly VIP.
+                You&apos;re on the list! Welcome to Commonlys VIP.
               </div>
             ) : (
               <form

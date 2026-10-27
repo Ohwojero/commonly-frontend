@@ -110,7 +110,7 @@ export function ProductGallery({
 
   const handleToggleSave = async () => {
     if (!user) {
-      window.dispatchEvent(new CustomEvent('commonly:open-auth'))
+      window.dispatchEvent(new CustomEvent('commonlys:open-auth'))
       return
     }
     if (saveLoading || !product.id) return
@@ -143,7 +143,7 @@ export function ProductGallery({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `${product.brand} - ${product.name} | Commonly`,
+          title: `${product.brand} - ${product.name} | Commonlys`,
           url: window.location.href,
         })
       } catch {
@@ -381,7 +381,7 @@ export function ProductGallery({
                   </span>
                 </div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                  Commonly Verified
+                  Commonlys Verified
                 </span>
               </div>
               <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground font-sans">
@@ -542,7 +542,7 @@ export function ProductGallery({
 
               {/* Amazon Compliance Notice */}
               <p className="mt-1 text-[11px] text-muted-foreground/80 leading-relaxed border border-border/40 rounded-xl bg-muted/20 px-3.5 py-2">
-                <strong>Amazon Associates Disclosure:</strong> As an Amazon Associate, Commonly earns from qualifying purchases. Live pricing, stock availability, and Prime delivery are fulfilled securely on Amazon.
+                <strong>Amazon Associates Disclosure:</strong> As an Amazon Associate, Commonlys earns from qualifying purchases. Live pricing, stock availability, and Prime delivery are fulfilled securely on Amazon.
               </p>
             </div>
           </section>
@@ -661,7 +661,7 @@ export function ProductGallery({
             <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 sm:p-5 text-sm text-muted-foreground">
               <button
                 type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('commonly:open-auth'))}
+                onClick={() => window.dispatchEvent(new CustomEvent('commonlys:open-auth'))}
                 className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-xs transition-all duration-200 hover:bg-primary/90 active:scale-95"
               >
                 Sign in

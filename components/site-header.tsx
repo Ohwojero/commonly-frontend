@@ -231,7 +231,11 @@ export function SiteHeader() {
   useEffect(() => {
     const handler = () => setAuthOpen(true)
     window.addEventListener('commonly:open-auth', handler)
-    return () => window.removeEventListener('commonly:open-auth', handler)
+    window.addEventListener('commonlys:open-auth', handler)
+    return () => {
+      window.removeEventListener('commonly:open-auth', handler)
+      window.removeEventListener('commonlys:open-auth', handler)
+    }
   }, [])
 
   return (
@@ -249,7 +253,7 @@ export function SiteHeader() {
             {open ? <X /> : <Menu />}
           </button>
           <Link href="/" className="shrink-0 font-serif text-2xl tracking-tight">
-            Commonly.
+            Commonlys.
           </Link>
           <nav
             className={`${
@@ -344,7 +348,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
         <div>
           <Link href="/" className="font-serif text-3xl">
-            Commonly.
+            Commonlys.
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-6 text-primary-foreground/75">
             Where peak productivity infrastructure meets quiet luxury self-care. An independent
@@ -448,7 +452,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="mx-auto mt-14 flex max-w-7xl flex-col gap-3 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between">
-        <span>© 2026 Commonly. All rights reserved.</span>
+        <span>© 2026 Commonlys. All rights reserved.</span>
         <span className="max-w-md text-center leading-relaxed sm:text-right">
           As an Amazon Associate I earn from qualifying purchases. Product prices, ratings, and
           availability are subject to change. Any price and availability information displayed on

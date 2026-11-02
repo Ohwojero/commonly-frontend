@@ -100,8 +100,6 @@ export function ProductGallery({
       }
     } catch {}
   }
-  const [zoomPoint, setZoomPoint] = useState({ x: 50, y: 50 })
-  const [isZooming, setIsZooming] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -197,7 +195,7 @@ export function ProductGallery({
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,.85fr)] lg:gap-12">
           {/* Product Gallery Section */}
-          <section className="flex flex-col-reverse gap-3.5 sm:grid sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-4">
+          <section className="flex min-w-0 flex-col-reverse gap-3.5 sm:grid sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-4">
             {/* Thumbnails: horizontal scroll on mobile, vertical stack on desktop */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-none">
               {images.map((image, index) => (
@@ -205,6 +203,7 @@ export function ProductGallery({
                   key={index}
                   type="button"
                   aria-label={`View product image ${index + 1}`}
+                  aria-pressed={activeImage === index}
                   onClick={() => setActiveImage(index)}
                   className={`size-14 sm:size-16 shrink-0 aspect-square overflow-hidden rounded-xl border-2 bg-muted transition-all duration-200 ${
                     activeImage === index
@@ -215,7 +214,7 @@ export function ProductGallery({
                   <img
                     src={image}
                     alt={`Product view ${index + 1}`}
-                    className="size-full object-cover"
+                    className="size-full bg-white object-contain p-1"
                     onError={(e) => {
                       ;(e.target as HTMLImageElement).src = FALLBACK_IMG
                     }}
@@ -226,44 +225,16 @@ export function ProductGallery({
 
             {/* Main Image with Zoom */}
             <div
-              className="group relative flex min-h-[320px] sm:min-h-[420px] lg:min-h-[500px] cursor-crosshair items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-xs"
-              onMouseEnter={() => setIsZooming(true)}
-              onMouseLeave={() => setIsZooming(false)}
-              onMouseMove={(event) => {
-                const rect = event.currentTarget.getBoundingClientRect()
-                setZoomPoint({
-                  x: ((event.clientX - rect.left) / rect.width) * 100,
-                  y: ((event.clientY - rect.top) / rect.height) * 100,
-                })
-              }}
+              className="relative flex min-w-0 aspect-[4/3] min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-white shadow-xs sm:min-h-0"
             >
               <img
                 src={images[activeImage]}
-                alt={product.name}
-                className="size-full object-cover transition-all duration-300"
+                alt={`${product.name} - image ${activeImage + 1}`}
+                className="size-full object-contain p-5 transition-opacity duration-200 sm:p-8"
                 onError={(e) => {
                   ;(e.target as HTMLImageElement).src = FALLBACK_IMG
                 }}
               />
-
-              {isZooming && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute size-48 sm:size-60 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary/40 shadow-2xl"
-                  style={{
-                    left: `${zoomPoint.x}%`,
-                    top: `${zoomPoint.y}%`,
-                    backgroundImage: `url(${images[activeImage]})`,
-                    backgroundPosition: `${zoomPoint.x}% ${zoomPoint.y}%`,
-                    backgroundSize: '250%',
-                  }}
-                />
-              )}
-
-              {/* Hover Zoom Prompt (desktop only) */}
-              <div className="hidden sm:block absolute bottom-4 left-4 rounded-full bg-background/85 px-3 py-1.5 text-xs font-medium text-foreground opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100">
-                Move over image to zoom
-              </div>
 
               {/* Quick Action Overlay: Wishlist */}
               <div className="absolute right-4 top-4">
@@ -286,7 +257,7 @@ export function ProductGallery({
           </section>
 
           {/* Product Details & Editorial Section */}
-          <section className="flex flex-col lg:pt-1">
+          <section className="flex min-w-0 flex-col lg:pt-1">
             {/* Brand, Category & Tag Badges */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs uppercase tracking-[0.18em] font-semibold text-accent">

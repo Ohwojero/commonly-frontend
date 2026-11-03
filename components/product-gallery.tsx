@@ -29,6 +29,14 @@ const galleryImages = (product: Product): string[] => {
   return Array.from(new Set([product.image, ...(product.images ?? [])].filter(Boolean))).slice(0, 4)
 }
 
+const splitSentences = (items: string[] = []) =>
+  items.flatMap((item) =>
+    item
+      .split(/(?<=[.!?])\s+(?=[A-Z])/)
+      .map((sentence) => sentence.trim())
+      .filter(Boolean)
+  )
+
 export function ProductGallery({
   product,
   relatedProducts = [],
@@ -155,21 +163,23 @@ export function ProductGallery({
   }
 
   const toRows = (items: string[] | undefined, fallback: string[]) =>
-    (items?.length ? items : fallback).map((item) => {
-      const idx = item.indexOf(':')
-      if (idx !== -1) {
-        return {
-          hasLabel: true,
-          label: item.slice(0, idx).trim(),
-          value: item.slice(idx + 1).trim(),
+    (items?.length ? items : fallback).flatMap((item) =>
+      item.split(/\s+(?=(?:Collection|Included Products|Main Focus):\s*)/i).map((part) => {
+        const idx = part.indexOf(':')
+        if (idx !== -1) {
+          return {
+            hasLabel: true,
+            label: part.slice(0, idx).trim(),
+            value: part.slice(idx + 1).trim(),
+          }
         }
-      }
-      return {
-        hasLabel: false,
-        label: '',
-        value: item.trim(),
-      }
-    })
+        return {
+          hasLabel: false,
+          label: '',
+          value: part.trim(),
+        }
+      })
+    )
 
 
   return (
@@ -267,14 +277,6 @@ export function ProductGallery({
               <span className="text-xs text-muted-foreground uppercase tracking-wider">
                 {product.subcategory || product.category}
               </span>
-              {product.tags?.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center rounded-full bg-muted/60 px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground border border-border/50"
-                >
-                  {tag}
-                </span>
-              ))}
             </div>
 
             {/* Product Title & Share */}
@@ -392,14 +394,16 @@ export function ProductGallery({
                         key={i}
                         className={
                           row.hasLabel
-                            ? 'grid grid-cols-[110px_1fr] sm:grid-cols-[140px_1fr] gap-3 sm:gap-4 py-2.5 text-xs sm:text-sm leading-relaxed items-start'
+                            ? row.label.length > 32
+                              ? 'space-y-1 py-2.5 text-xs sm:text-sm leading-relaxed'
+                              : 'grid min-w-0 grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] gap-3 py-2.5 text-xs sm:gap-4 sm:text-sm leading-relaxed items-start'
                             : 'py-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground'
                         }
                       >
                         {row.hasLabel ? (
                           <>
-                            <span className="font-semibold text-foreground/80 capitalize">{row.label}</span>
-                            <span className="text-muted-foreground">{row.value}</span>
+                            <span className="min-w-0 break-words font-semibold text-foreground/80 capitalize">{row.label}</span>
+                            <span className="min-w-0 break-words text-muted-foreground">{row.value}</span>
                           </>
                         ) : (
                           <span>{row.value}</span>
@@ -418,22 +422,23 @@ export function ProductGallery({
                     <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
                   </div>
                   <ul className="divide-y divide-border/40 px-4 sm:px-5">
-                    {product.highlights.map((item, i) => {
-                      const [label, ...rest] = item.split(':')
-                      const value = rest.length ? rest.join(':').trim() : null
+                    {splitSentences(product.highlights).map((item, i) => {
+                      const separator = item.indexOf(':')
+                      const label = separator >= 0 ? item.slice(0, separator).trim() : ''
+                      const value = separator >= 0 ? item.slice(separator + 1).trim() : item
                       return (
                         <li key={i} className="flex items-start gap-3 py-2.5 text-xs sm:text-sm leading-relaxed">
                           <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
                             <Check className="size-2.5 text-emerald-600" />
                           </span>
                           <span>
-                            {value ? (
+                            {label && value ? (
                               <>
-                                <span className="font-semibold text-foreground">{label.trim()}:</span>{' '}
+                                <span className="font-semibold text-foreground">{label}:</span>{' '}
                                 <span className="text-muted-foreground">{value}</span>
                               </>
                             ) : (
-                              <span className="text-muted-foreground">{label.trim()}</span>
+                              <span className="text-muted-foreground">{value}</span>
                             )}
                           </span>
                         </li>
@@ -451,17 +456,14 @@ export function ProductGallery({
                     <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Who Can Make Use of It</h3>
                   </div>
                   <div className="px-4 py-4 sm:px-5">
-                    <div className="flex flex-wrap gap-2">
-                      {product.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground shadow-2xs"
-                        >
-                          <span className="size-1.5 rounded-full bg-primary/60" />
-                          {tag}
-                        </span>
+                    <ul className="space-y-2">
+                      {splitSentences(product.tags).map((tag, index) => (
+                        <li key={`${index}-${tag}`} className="flex items-start gap-2.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                          <span className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-primary/60" />
+                          <span className="min-w-0 break-words">{tag}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 </div>
               )}

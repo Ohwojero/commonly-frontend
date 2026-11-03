@@ -37,6 +37,9 @@ const splitSentences = (items: string[] = []) =>
       .filter(Boolean)
   )
 
+const itemDetailLabels =
+  /(?=\s+(?:Brand|Collection|Included Products|Main Focus|Color|Ear Placement|Form Factor|Impedance|Connectivity|Style|Size|Material|Weight|Model|Type|Battery|Compatibility|Power|Dimensions|Technology|Finish|Origin|Skin Type|Use|Capacity|Features):\s*)/i
+
 export function ProductGallery({
   product,
   relatedProducts = [],
@@ -164,7 +167,7 @@ export function ProductGallery({
 
   const toRows = (items: string[] | undefined, fallback: string[]) =>
     (items?.length ? items : fallback).flatMap((item) =>
-      item.split(/\s+(?=(?:Collection|Included Products|Main Focus):\s*)/i).map((part) => {
+      item.split(itemDetailLabels).map((part) => {
         const idx = part.indexOf(':')
         if (idx !== -1) {
           return {
@@ -395,8 +398,8 @@ export function ProductGallery({
                         className={
                           row.hasLabel
                             ? row.label.length > 32
-                              ? 'space-y-1 py-2.5 text-xs sm:text-sm leading-relaxed'
-                              : 'grid min-w-0 grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] gap-3 py-2.5 text-xs sm:gap-4 sm:text-sm leading-relaxed items-start'
+                              ? 'space-y-1 py-2.5 text-left text-xs leading-relaxed sm:text-sm'
+                              : 'grid min-w-0 grid-cols-[minmax(0,.4fr)_minmax(0,1fr)] gap-3 py-2.5 text-left text-xs leading-relaxed sm:gap-4 sm:text-sm'
                             : 'py-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground'
                         }
                       >

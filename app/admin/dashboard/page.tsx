@@ -1964,7 +1964,7 @@ export default function DashboardPage() {
                       <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
                       <label className="text-xs font-semibold text-foreground">Who Can Make Use of It</label>
                     </div>
-                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated audience tags. These appear as pill badges on the product page.</p>
+                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated audience descriptions. These appear in the “Who Can Make Use of It” section.</p>
                     <textarea
                       value={form.tags}
                       onChange={e => update('tags', e.target.value)}

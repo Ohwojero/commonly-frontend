@@ -59,19 +59,13 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
 
         {/* Top Badges */}
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-3.5">
-          {(product.tags?.[0] || product.category) && (
+          {(product.subcategory || product.category) && (
             <Badge
               variant="secondary"
-              className="border-0 bg-background/95 text-[11px] font-medium tracking-wide shadow-sm backdrop-blur-md"
+              className="max-w-[65%] truncate border-0 bg-background/95 text-[11px] font-medium tracking-wide shadow-sm backdrop-blur-md"
             >
-              {product.tags?.[0] || product.category}
+              {product.subcategory || product.category}
             </Badge>
-          )}
-          {product.prime && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#131921]/90 px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-sm backdrop-blur-md border border-[#FF9900]/30 tracking-wider uppercase">
-              <span className="size-1.5 rounded-full bg-[#FF9900]" />
-              Amazon Prime
-            </span>
           )}
         </div>
 

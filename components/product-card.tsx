@@ -46,12 +46,12 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
   return (
     <Card className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-border/70 bg-card p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-xl">
       {/* Visual / Media Container */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
         <Link href={`/products/${product.slug}`} className="block size-full" aria-label={`View ${product.name} details`}>
           <img
             src={product.image}
             alt={product.name}
-            className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="size-full object-contain"
             loading="lazy"
             onError={(e) => { (e.target as HTMLImageElement).src = '/luxury-placeholder.svg' }}
           />

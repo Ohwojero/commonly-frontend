@@ -37,6 +37,18 @@ const splitSentences = (items: string[] = []) =>
       .filter(Boolean)
   )
 
+const splitNumberedItems = (items: string[] = []) =>
+  items.flatMap((item) =>
+    item.split(/\r?\n/).flatMap((line) => {
+      const content = line.replace(/^(?:(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)+/, '')
+      return content
+        .split(/\s+(?=(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)/)
+        .flatMap((part) => splitSentences([part]))
+        .map((part) => part.replace(/^(?:(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)+/, '').trim())
+        .filter(Boolean)
+    })
+  )
+
 const itemDetailLabels =
   /(?=\s+(?:Brand|Collection|Included Products|Main Focus|Color|Ear Placement|Form Factor|Impedance|Connectivity|Style|Size|Material|Weight|Model|Type|Battery|Compatibility|Power|Dimensions|Technology|Finish|Origin|Skin Type|Use|Capacity|Features):\s*)/i
 
@@ -425,16 +437,16 @@ export function ProductGallery({
                     <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
                   </div>
                   <ul className="divide-y divide-border/40 px-4 sm:px-5">
-                    {splitSentences(product.highlights).map((item, i) => {
+                    {splitNumberedItems(product.highlights).map((item, i) => {
                       const separator = item.indexOf(':')
                       const label = separator >= 0 ? item.slice(0, separator).trim() : ''
                       const value = separator >= 0 ? item.slice(separator + 1).trim() : item
                       return (
-                        <li key={i} className="flex items-start gap-3 py-2.5 text-xs sm:text-sm leading-relaxed">
-                          <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
-                            <Check className="size-2.5 text-emerald-600" />
+                        <li key={i} className="flex min-w-0 items-start gap-3 py-3 text-xs leading-relaxed sm:text-sm">
+                          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold tabular-nums text-primary">
+                            {i + 1}
                           </span>
-                          <span>
+                          <span className="min-w-0 break-words pt-0.5">
                             {label && value ? (
                               <>
                                 <span className="font-semibold text-foreground">{label}:</span>{' '}

@@ -42,6 +42,7 @@ import { type Product } from '@/lib/products'
 import { type Category, apiCategoryToCategory } from '@/lib/categories'
 import { storefrontNavGroups } from '@/lib/storefront-navigation'
 import { useAuth } from '@/lib/auth-store'
+import { parseListInput, reconstructItems, parseItemDetails } from '@/lib/bullet-helpers'
 import {
   fetchProducts,
   fetchCategories,
@@ -662,10 +663,10 @@ export default function DashboardPage() {
       images: item.images || [],
       affiliateUrl: item.affiliateUrl || '',
       description: item.description,
-      highlights: item.highlights?.join(', ') || '',
-      itemDetails: item.itemDetails?.join(', ') || '',
-      specs: item.specs?.join(', ') || '',
-      tags: item.tags.join(', '),
+      highlights: reconstructItems(item.highlights).join('\n'),
+      itemDetails: parseItemDetails(item.itemDetails).map(r => r.hasLabel ? `${r.label}: ${r.value}` : r.value).join('\n'),
+      specs: reconstructItems(item.specs).join('\n'),
+      tags: reconstructItems(item.tags).join('\n'),
       rating: item.rating,
       views: String(item.views),
       prime: item.prime ?? false,
@@ -707,10 +708,10 @@ export default function DashboardPage() {
       images: form.images,
       description: form.description.trim(),
       affiliateUrl: form.affiliateUrl ? form.affiliateUrl.trim() : undefined,
-      highlights: split(form.highlights),
-      itemDetails: split(form.itemDetails),
-      specs: split(form.specs),
-      tags: split(form.tags),
+      highlights: parseListInput(form.highlights),
+      itemDetails: parseListInput(form.itemDetails),
+      specs: parseListInput(form.specs),
+      tags: parseListInput(form.tags),
       categorySlug,
       subcategorySlug,
       subcategoryLabel,
@@ -1915,8 +1916,9 @@ export default function DashboardPage() {
                   <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Editorial Description</h3>
                   <div className="space-y-3">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium">Description</label>
-                      <textarea value={form.description} onChange={e => update('description', e.target.value)} placeholder="Short editorial description of the product…" className="min-h-24 rounded-md border bg-background p-3 text-sm resize-none" />
+                      <label className="text-xs font-medium">Description ("About this item")</label>
+                      <p className="text-[11px] text-muted-foreground">Write a paragraph or paste Amazon bullets. Format: <code className="bg-muted px-1 rounded">• Feature: Detailed write-up</code></p>
+                      <textarea value={form.description} onChange={e => update('description', e.target.value)} placeholder="• Ergonomic Office Chair: We've got your back with this ergonomic kneeling office chair...&#10;• Better Posture: This posture chair has a smart design..." className="min-h-32 rounded-md border bg-background p-3 text-sm resize-y" />
                     </div>
                   </div>
                 </div>
@@ -1934,12 +1936,12 @@ export default function DashboardPage() {
                       <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
                       <label className="text-xs font-semibold text-foreground">Item Details</label>
                     </div>
-                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated key-value pairs. Format: <code className="bg-muted px-1 rounded">Label: Value</code></p>
+                    <p className="text-[11px] text-muted-foreground pl-7">One per line (or comma-separated). Format: <code className="bg-muted px-1 rounded">Label: Value</code></p>
                     <textarea
                       value={form.itemDetails}
                       onChange={e => update('itemDetails', e.target.value)}
-                      placeholder="Brand: Dr. Barbara Sturm, Size: 30ml, Skin Type: All, Origin: Germany"
-                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none"
+                      placeholder="Brand: DRAGONN&#10;Material: Mesh Metal&#10;Color: Black&#10;Product Dimensions: 26.2 In x 18.7 In&#10;Size: Standard"
+                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none font-mono text-xs"
                     />
                   </div>
 
@@ -1949,12 +1951,12 @@ export default function DashboardPage() {
                       <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
                       <label className="text-xs font-semibold text-foreground">Why You Should Buy It</label>
                     </div>
-                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated bullet points. Format: <code className="bg-muted px-1 rounded">Benefit: Explanation</code> or just a plain phrase.</p>
+                    <p className="text-[11px] text-muted-foreground pl-7">One bullet per line (or paste Amazon bullets directly). Format: <code className="bg-muted px-1 rounded">Feature: Detailed explanation</code></p>
                     <textarea
                       value={form.highlights}
                       onChange={e => update('highlights', e.target.value)}
-                      placeholder="Dual wavelength: Penetrates deeper skin layers, Medical grade: CE and FDA cleared, Flexible design: Contours to your face"
-                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none"
+                      placeholder="Multi-adjustable 3D armrests: Offers height, depth, and angle adjustments to align forearms...&#10;Integrated headrest &amp; dynamic lumbar support: Features a height- and angle-adjustable headrest...&#10;High-back breathable mesh backrest: Utilizes a full-length elastic mesh design..."
+                      className="w-full min-h-24 rounded-md border bg-background p-3 text-sm resize-none"
                     />
                   </div>
 
@@ -1964,12 +1966,12 @@ export default function DashboardPage() {
                       <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
                       <label className="text-xs font-semibold text-foreground">Who Can Make Use of It</label>
                     </div>
-                    <p className="text-[11px] text-muted-foreground pl-7">Comma-separated audience descriptions. These appear in the “Who Can Make Use of It” section.</p>
+                    <p className="text-[11px] text-muted-foreground pl-7">One persona per line. Format: <code className="bg-muted px-1 rounded">Audience: Explanation</code></p>
                     <textarea
                       value={form.tags}
                       onChange={e => update('tags', e.target.value)}
-                      placeholder="Skincare Enthusiasts, Anti-Aging, Sensitive Skin, Dermatologist Recommended"
-                      className="w-full min-h-16 rounded-md border bg-background p-3 text-sm resize-none"
+                      placeholder="Software developers: Maintain proper neck, spinal, and forearm alignment across long coding marathons.&#10;Financial analysts: Stay comfortable during extended hours of financial modeling.&#10;Remote workers: Upgrade a home office with a complete ergonomic chair."
+                      className="w-full min-h-20 rounded-md border bg-background p-3 text-sm resize-none"
                     />
                   </div>
 

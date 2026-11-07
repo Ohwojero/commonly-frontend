@@ -22,35 +22,13 @@ import { useAuth } from '@/lib/auth-store'
 import { RelatedProducts } from '@/components/related-products'
 import { RegisterGate } from '@/components/register-gate'
 import type { Product } from '@/lib/products'
+import { reconstructItems, parseBullet, parseItemDetails, parseDescription } from '@/lib/bullet-helpers'
 
 const FALLBACK_IMG = '/luxury-placeholder.svg'
 
 const galleryImages = (product: Product): string[] => {
   return Array.from(new Set([product.image, ...(product.images ?? [])].filter(Boolean))).slice(0, 4)
 }
-
-const splitSentences = (items: string[] = []) =>
-  items.flatMap((item) =>
-    item
-      .split(/(?<=[.!?])\s+(?=[A-Z])/)
-      .map((sentence) => sentence.trim())
-      .filter(Boolean)
-  )
-
-const splitNumberedItems = (items: string[] = []) =>
-  items.flatMap((item) =>
-    item.split(/\r?\n/).flatMap((line) => {
-      const content = line.replace(/^(?:(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)+/, '')
-      return content
-        .split(/\s+(?=(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)/)
-        .flatMap((part) => splitSentences([part]))
-        .map((part) => part.replace(/^(?:(?:\d+\s*[.):\-]|\(\s*\d+\s*\))\s+)+/, '').trim())
-        .filter(Boolean)
-    })
-  )
-
-const itemDetailLabels =
-  /(?=\s+(?:Brand|Collection|Included Products|Main Focus|Color|Ear Placement|Form Factor|Impedance|Connectivity|Style|Size|Material|Weight|Model|Type|Battery|Compatibility|Power|Dimensions|Technology|Finish|Origin|Skin Type|Use|Capacity|Features):\s*)/i
 
 export function ProductGallery({
   product,
@@ -177,24 +155,8 @@ export function ProductGallery({
     }
   }
 
-  const toRows = (items: string[] | undefined, fallback: string[]) =>
-    (items?.length ? items : fallback).flatMap((item) =>
-      item.split(itemDetailLabels).map((part) => {
-        const idx = part.indexOf(':')
-        if (idx !== -1) {
-          return {
-            hasLabel: true,
-            label: part.slice(0, idx).trim(),
-            value: part.slice(idx + 1).trim(),
-          }
-        }
-        return {
-          hasLabel: false,
-          label: '',
-          value: part.trim(),
-        }
-      })
-    )
+  const toRows = (items: string[] | undefined, fallback: string[] = []) =>
+    parseItemDetails(items?.length ? items : fallback)
 
 
   return (
@@ -357,7 +319,7 @@ export function ProductGallery({
               )}
             </div>
 
-            {/* Clinical Editorial Verdict Card */}
+            {/* Clinical Editorial Verdict / About this item Card */}
             <div className="mt-5 rounded-2xl border border-border/70 bg-gradient-to-br from-muted/30 to-muted/10 p-4 sm:p-5 shadow-2xs">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -365,27 +327,54 @@ export function ProductGallery({
                     <Sparkles className="size-3.5" />
                   </span>
                   <span className="text-xs font-semibold uppercase tracking-widest text-foreground">
-                    Clinical Editorial Verdict
+                    About this item
                   </span>
                 </div>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                   Commonlys Verified
                 </span>
               </div>
-              <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground font-sans">
-                {product.description}
-              </p>
+              {(() => {
+                const descData = parseDescription(product.description)
+                if (descData.isList && descData.items.length > 0) {
+                  return (
+                    <ul className="mt-3 space-y-2.5">
+                      {descData.items.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed">
+                          <span className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-foreground/70" />
+                          <span className="min-w-0 break-words">
+                            {item.label ? (
+                              <>
+                                <span className="font-semibold text-foreground">{item.label}:</span>{' '}
+                                <span className="text-muted-foreground">{item.value}</span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">{item.value}</span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                }
+                return (
+                  <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground font-sans">
+                    {product.description}
+                  </p>
+                )
+              })()}
               {product.highlights && product.highlights.length > 0 && (
                 <div className="mt-3.5 flex flex-wrap gap-1.5 pt-3 border-t border-border/50">
-                  {product.highlights.slice(0, 3).map((item, idx) => {
-                    const [label] = item.split(':')
+                  {reconstructItems(product.highlights).slice(0, 4).map((item, idx) => {
+                    const { label, value } = parseBullet(item)
+                    const textToShow = label || (value.length > 35 ? value.slice(0, 32) + '…' : value)
                     return (
                       <span
                         key={idx}
                         className="inline-flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-[11px] font-medium text-foreground shadow-2xs border border-border/40"
                       >
                         <Check className="size-3 text-emerald-600" />
-                        {label.trim()}
+                        {textToShow}
                       </span>
                     )
                   })}
@@ -409,15 +398,13 @@ export function ProductGallery({
                         key={i}
                         className={
                           row.hasLabel
-                            ? row.label.length > 32
-                              ? 'space-y-1 py-2.5 text-left text-xs leading-relaxed sm:text-sm'
-                              : 'grid min-w-0 grid-cols-[minmax(0,.4fr)_minmax(0,1fr)] gap-3 py-2.5 text-left text-xs leading-relaxed sm:gap-4 sm:text-sm'
+                            ? 'grid min-w-0 grid-cols-[140px_minmax(0,1fr)] sm:grid-cols-[180px_minmax(0,1fr)] gap-3 py-2.5 text-left text-xs leading-relaxed sm:gap-4 sm:text-sm'
                             : 'py-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground'
                         }
                       >
                         {row.hasLabel ? (
                           <>
-                            <span className="min-w-0 break-words font-semibold text-foreground/80 capitalize">{row.label}</span>
+                            <span className="min-w-0 break-words font-semibold text-foreground">{row.label}</span>
                             <span className="min-w-0 break-words text-muted-foreground">{row.value}</span>
                           </>
                         ) : (
@@ -437,17 +424,15 @@ export function ProductGallery({
                     <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
                   </div>
                   <ul className="divide-y divide-border/40 px-4 sm:px-5">
-                    {splitNumberedItems(product.highlights).map((item, i) => {
-                      const separator = item.indexOf(':')
-                      const label = separator >= 0 ? item.slice(0, separator).trim() : ''
-                      const value = separator >= 0 ? item.slice(separator + 1).trim() : item
+                    {reconstructItems(product.highlights).map((item, i) => {
+                      const { label, value } = parseBullet(item)
                       return (
                         <li key={i} className="flex min-w-0 items-start gap-3 py-3 text-xs leading-relaxed sm:text-sm">
                           <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold tabular-nums text-primary">
                             {i + 1}
                           </span>
                           <span className="min-w-0 break-words pt-0.5">
-                            {label && value ? (
+                            {label ? (
                               <>
                                 <span className="font-semibold text-foreground">{label}:</span>{' '}
                                 <span className="text-muted-foreground">{value}</span>
@@ -471,13 +456,25 @@ export function ProductGallery({
                     <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Who Can Make Use of It</h3>
                   </div>
                   <div className="px-4 py-4 sm:px-5">
-                    <ul className="space-y-2">
-                      {splitSentences(product.tags).map((tag, index) => (
-                        <li key={`${index}-${tag}`} className="flex items-start gap-2.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                          <span className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-primary/60" />
-                          <span className="min-w-0 break-words">{tag}</span>
-                        </li>
-                      ))}
+                    <ul className="space-y-3">
+                      {reconstructItems(product.tags).map((tag, index) => {
+                        const { label, value } = parseBullet(tag)
+                        return (
+                          <li key={`${index}-${tag}`} className="flex items-start gap-3 text-xs leading-relaxed sm:text-sm">
+                            <span className="mt-1.5 flex size-2 shrink-0 rounded-full border-[1.5px] border-primary/70 bg-transparent" />
+                            <span className="min-w-0 break-words">
+                              {label ? (
+                                <>
+                                  <span className="font-semibold text-foreground">{label}:</span>{' '}
+                                  <span className="text-muted-foreground">{value}</span>
+                                </>
+                              ) : (
+                                <span className="text-muted-foreground">{value}</span>
+                              )}
+                            </span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 </div>

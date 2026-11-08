@@ -11,17 +11,22 @@
 export function reconstructItems(rawItems: string[] = []): string[] {
   if (!rawItems || rawItems.length === 0) return []
 
-  // Flatten any lines if items contain embedded newlines
-  const lines: string[] = []
+  // Flatten any lines if items contain embedded newlines or concatenated bullets without newlines
+  const rawLines: string[] = []
   for (const raw of rawItems) {
     if (typeof raw !== 'string') continue
     const parts = raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
-    lines.push(...parts)
+    for (const part of parts) {
+      // Split if multiple bullet points or personas are concatenated without newlines
+      // e.g. "...demands.Precision digital encoder knobs & Output control: ..."
+      const subItems = part.split(/(?<=[.!?])\s*(?=[A-Z][A-Za-z0-9\s&/–-]{2,60}:)/).map((s) => s.trim()).filter(Boolean)
+      rawLines.push(...subItems)
+    }
   }
 
   const result: string[] = []
 
-  for (const item of lines) {
+  for (const item of rawLines) {
     // Strip leading numbers (e.g. "1.", "1)", "(1)"), bullets ("•", "-", "*", "o", "◦")
     const clean = item
       .replace(/^(?:(?:\d+\s*[.):\-]|\(\s*\d+\s*\)|[•\-\*o\u2022\u25E6])\s*)+/, '')
@@ -35,9 +40,9 @@ export function reconstructItems(rawItems: string[] = []): string[] {
       const startsWithConjunction = /^(?:and|or|but|with|so|including|plus|to|for|while)\b/i.test(clean)
       const prevDoesNotEndSentence = !/[.!?]$/.test(prev)
       const colonIdx = clean.indexOf(':')
-      const hasNoLabel = colonIdx === -1 || colonIdx > 45
+      const hasNoLabel = colonIdx === -1 || colonIdx > 60 || /[.!?]/.test(clean.slice(0, colonIdx))
 
-      if ((startsWithLower || startsWithConjunction || prevDoesNotEndSentence) && hasNoLabel) {
+      if (hasNoLabel && (startsWithLower || startsWithConjunction || prevDoesNotEndSentence)) {
         result[result.length - 1] = `${prev}, ${clean}`
         continue
       }
@@ -256,12 +261,20 @@ export function parseListInput(v: string): string[] {
       .filter(Boolean)
   }
 
-  // 4. If semicolons are used
+  // 4. If single-line with glued bullet sentences like "...sentence.Feature Name: writeup"
+  if (/(?<=[.!?])\s*(?=[A-Z][A-Za-z0-9\s&/–-]{2,60}:)/.test(text)) {
+    return text
+      .split(/(?<=[.!?])\s*(?=[A-Z][A-Za-z0-9\s&/–-]{2,60}:)/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+
+  // 5. If semicolons are used
   if (text.includes(';')) {
     return text.split(';').map((s) => s.trim()).filter(Boolean)
   }
 
-  // 5. If commas are used:
+  // 6. If commas are used:
   // If there are colons (e.g. "Brand: DRAGONN, Material: Mesh Metal"), only split before "Label:"
   if (text.includes(',')) {
     if (text.includes(':')) {

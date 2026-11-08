@@ -36,10 +36,10 @@ export default function RegisterPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <div className="hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
-        <Link href="/" className="font-serif text-2xl">Commonlys.</Link>
+        <Link href="/" className="font-sans text-2xl">Commonlys.</Link>
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60">Join the common room</p>
-          <h1 className="mt-4 max-w-md font-serif text-6xl leading-[.95]">Good things are better shared.</h1>
+          <h1 className="mt-4 max-w-md font-sans text-6xl leading-[.95]">Good things are better shared.</h1>
           <p className="mt-6 max-w-sm leading-7 text-primary-foreground/70">
             Save your favorite finds, follow thoughtful guides, and get the occasional note from us.
           </p>
@@ -50,7 +50,7 @@ export default function RegisterPage() {
       <div className="flex flex-col p-6 sm:p-10 lg:justify-center lg:px-20">
         <div className="mb-8 rounded-xl bg-primary p-5 text-primary-foreground lg:hidden">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground/75">Join the Commonlys community</p>
-          <p className="mt-2 font-serif text-2xl">Good things are better shared.</p>
+          <p className="mt-2 font-sans text-2xl">Good things are better shared.</p>
           <p className="mt-2 text-sm leading-6 text-primary-foreground/85">
             Save your favorite finds and keep thoughtful recommendations close.
           </p>
@@ -60,7 +60,7 @@ export default function RegisterPage() {
         </Link>
         <div className="max-w-md">
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Join Commonlys</p>
-          <h2 className="mt-3 font-serif text-4xl">Create your account</h2>
+          <h2 className="mt-3 font-sans text-4xl">Create your account</h2>
           <div className="mt-4 rounded-lg bg-primary p-4 text-primary-foreground">
             <p className="text-sm leading-6">
               Create an account to save your favorite products and keep your curated picks together.
@@ -75,7 +75,7 @@ export default function RegisterPage() {
               <div className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground">
                 <Check className="size-5" />
               </div>
-              <h3 className="mt-5 font-serif text-2xl">You&apos;re in.</h3>
+              <h3 className="mt-5 font-sans text-2xl">You&apos;re in.</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Your account is ready. We&apos;ll keep the good stuff coming.
               </p>

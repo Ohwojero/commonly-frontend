@@ -180,7 +180,7 @@ export function StorefrontShell() {
             <Search className="size-4 text-muted-foreground" />
             <Input
               autoFocus
-              placeholder="Search audiophile monitors, ergonomic chairs, ultra-wide screens, clinical skincare..."
+              placeholder="Search workspace gadgets, ergonomic chairs, mechanical keyboards, vertical monitors..."
               className="border-0 bg-transparent shadow-none focus-visible:ring-0"
             />
             <Button
@@ -224,54 +224,35 @@ export function StorefrontShell() {
 
             <div className="relative z-10 grid min-h-[480px] items-center gap-8 px-5 py-10 sm:min-h-[580px] sm:px-12 sm:py-16 lg:min-h-[640px] lg:grid-cols-[1.1fr_.9fr] lg:gap-12 lg:px-16 lg:py-20">
               <div className="flex flex-col justify-center">
-                <div className="inline-flex w-fit items-center gap-1.5 sm:gap-2 rounded-full border border-rose-300/30 bg-rose-500/10 px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-rose-200 backdrop-blur-md">
-                  <Sparkles className="size-3 text-rose-300 sm:size-3.5 shrink-0" />
-                  <span>The Independent Editorial Edit</span>
+                <div className="inline-flex w-fit items-center gap-1.5 sm:gap-2 rounded-full border border-amber-300/40 bg-amber-400/15 px-3.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
+                  <Sparkles className="size-3 text-amber-300 sm:size-3.5 shrink-0" />
+                  <span>Luxury Beauty &amp; Tech Accessories</span>
                 </div>
 
-                <h1 className="mt-4 sm:mt-6 max-w-3xl font-serif text-3xl sm:text-5xl lg:text-7xl leading-[1.08] sm:leading-[1.02] tracking-tight text-white uppercase">
-                  THE WORKSPACE &amp; RITUAL EDIT
+                <h1 className="mt-4 sm:mt-6 max-w-3xl font-sans text-3xl sm:text-5xl lg:text-7xl leading-[1.08] sm:leading-[1.02] tracking-tight text-white uppercase font-bold">
+                  CURATED LUXURY BEAUTY &amp; PREMIUM TECH ACCESSORIES.
                 </h1>
 
-                <p className="mt-3.5 sm:mt-6 max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed sm:leading-8 text-white/90">
-                  Where peak productivity infrastructure meets quiet luxury self-care. An
-                  independent curation of elite software engineer workspaces, clinical skincare,
-                  and premium workspace tech.
+                <p className="mt-3.5 sm:mt-6 max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed sm:leading-8 text-white/90 font-normal">
+                  Straightforward, honest curation on Amazon across two focused worlds:
+                  clinical luxury skincare &amp; beauty devices, and high-performance workspace &amp; tech accessories.
+                  We test the specs, cut through the marketing noise, and link directly to verified Amazon Prime products with 30-day returns.
                 </p>
 
                 <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                   <Link
-                    href="#categories"
-                    className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-semibold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
+                    href="/category/personal-edit"
+                    className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
                   >
-                    <span>Explore The 3 Edits</span>
+                    <span>Shop Luxury Beauty</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
                   <Link
-                    href="#shop"
-                    className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full border border-white/35 bg-white/10 px-7 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-[0.98] text-center"
+                    href="#categories"
+                    className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full border border-white/35 bg-white/10 px-7 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-[0.98] text-center"
                   >
-                    <span>Shop All Curated Picks</span>
+                    <span>Shop Tech &amp; Workspace</span>
                   </Link>
-                </div>
-
-                <div className="mt-8 sm:mt-10 grid grid-cols-1 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-6 border-t border-white/15 pt-5 sm:pt-6 text-xs text-white/80">
-                  <span className="flex items-center gap-2 text-[11px] sm:text-xs">
-                    <CheckCircle2 className="size-3.5 sm:size-4 text-rose-300 shrink-0" />
-                    Elite Developer Workspaces
-                  </span>
-                  <span className="flex items-center gap-2 text-[11px] sm:text-xs">
-                    <Sparkles className="size-3.5 sm:size-4 text-rose-300 shrink-0" />
-                    Clinical Molecular Self-Care
-                  </span>
-                  <span className="flex items-center gap-2 text-[11px] sm:text-xs">
-                    <Truck className="size-3.5 sm:size-4 text-rose-300 shrink-0" />
-                    Verified Prime Delivery
-                  </span>
-                  <span className="flex items-center gap-2 text-[11px] sm:text-xs">
-                    <ShieldCheck className="size-3.5 sm:size-4 text-rose-300 shrink-0" />
-                    100% Independent Editorial
-                  </span>
                 </div>
               </div>
 
@@ -300,16 +281,16 @@ export function StorefrontShell() {
                           ;(event.target as HTMLImageElement).src = '/luxury-placeholder.svg'
                         }}
                       />
-                      <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-                        {heroProduct.isSpotlight ? 'Featured Pick' : 'From the Edit'}
+                      <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                        Editor&apos;s #1 Top Pick
                       </span>
                     </div>
                     <div className="flex items-end justify-between gap-4 px-1 pb-1 pt-4 text-white">
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">
-                          {heroProduct.brand}
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                          {heroProduct.brand} · In Stock on Amazon
                         </p>
-                        <h2 className="mt-1 line-clamp-2 font-serif text-xl leading-tight sm:text-2xl">
+                        <h2 className="mt-1 line-clamp-2 font-sans text-xl font-bold leading-tight sm:text-2xl">
                           {heroProduct.name}
                         </h2>
                       </div>
@@ -356,12 +337,17 @@ export function StorefrontShell() {
                       <ChevronRight className="size-4" />
                     </button>
                   </div>
-                  <Link
-                    href={`/products/${heroProduct.slug}`}
-                    className="mt-3 flex h-10 items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-white/85"
-                  >
-                    View product <ArrowRight className="size-3.5" />
-                  </Link>
+                  <RegisterGate
+                    productSlug={heroProduct.slug}
+                    affiliateUrl={
+                      heroProduct.affiliateUrl ||
+                      `https://www.amazon.com/s?k=${encodeURIComponent(
+                        `${heroProduct.brand || ''} ${heroProduct.name || ''}`.trim()
+                      )}`
+                    }
+                    buttonLabel="Buy on Amazon"
+                    buttonClassName="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-white/85 shadow-sm"
+                  />
                 </div>
               )}
             </div>
@@ -373,38 +359,38 @@ export function StorefrontShell() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
+                <Sparkles className="size-5" />
+              </div>
+              <h3 className="mt-3 font-sans text-base font-bold">Luxury Skincare &amp; Beauty Tech</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
+                High-purity clinical serums, anti-aging LED light therapy, and molecular bond repair hair tech.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
                 <Zap className="size-5" />
               </div>
-              <h3 className="mt-3 font-serif text-base font-semibold">Studio Compute &amp; Audio</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Audiophile desktop monitors, spatial headphone amps, and ultra-wide vertical coding displays.
+              <h3 className="mt-3 font-sans text-base font-bold">Studio Compute &amp; Audio</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
+                High-throughput Thunderbolt hubs, spatial audio monitoring, and ultra-wide coding displays.
               </p>
             </div>
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
                 <CheckCircle2 className="size-5" />
               </div>
-              <h3 className="mt-3 font-serif text-base font-semibold">Ergonomic Architecture</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Herman Miller &amp; Steelcase task seating, solid hardwood motorized desks, and custom mechanical layouts.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
-                <Sparkles className="size-5" />
-              </div>
-              <h3 className="mt-3 font-serif text-base font-semibold">Medical-Grade Skincare</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                High-potency cellular actives, patented TFC8 peptides, and FDA-cleared microcurrent &amp; LED tech.
+              <h3 className="mt-3 font-sans text-base font-bold">Ergonomic Architecture</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
+                Engineered kneeling stools, high-back mesh task seating, motorized standing desks, and posture gear.
               </p>
             </div>
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
                 <Truck className="size-5" />
               </div>
-              <h3 className="mt-3 font-serif text-base font-semibold">Amazon Prime Assurance</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Verified brand storefront links with live transparent pricing and trusted Prime buyer protection.
+              <h3 className="mt-3 font-sans text-base font-bold">Amazon Prime Assurance</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
+                Verified brand storefront collation with live transparent pricing and trusted Prime buyer protection.
               </p>
             </div>
           </div>
@@ -414,12 +400,12 @@ export function StorefrontShell() {
         <section id="categories" className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-                Curated Editorial Collections
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
+                Our Curated Collections
               </p>
-              <h2 className="mt-2 font-serif text-3xl sm:text-5xl">Shop by Category</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                Three focused edits bridging elite workspace hardware, high-throughput compute, and quiet luxury personal rituals.
+              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Shop by Beauty &amp; Tech Category</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground font-medium">
+                Browse our focused edits across clinical luxury beauty, studio audio &amp; displays, and ergonomic workspace hardware.
               </p>
             </div>
             <p className="shrink-0 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -472,7 +458,7 @@ export function StorefrontShell() {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">
                           {group.eyebrow}
                         </p>
-                        <h3 className="font-serif text-2xl font-medium tracking-tight text-white">
+                        <h3 className="font-sans text-2xl font-medium tracking-tight text-white">
                           {group.label}
                         </h3>
                       </div>
@@ -566,12 +552,12 @@ export function StorefrontShell() {
         <section id="shop" className="mx-auto max-w-7xl px-5 py-16 lg:px-8 border-t border-border/60">
           <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
                 Curated Selection
               </p>
-              <h2 className="mt-2 font-serif text-3xl sm:text-5xl">Currently Considered</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Verified developer infrastructure, studio audio, ergonomic seating, and clinical self-care rituals.
+              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Top-Rated Beauty &amp; Tech Picks</h2>
+              <p className="mt-2 text-sm text-muted-foreground font-medium">
+                Verified luxury skincare, salon hair tech, studio compute, and ergonomic seating on Amazon. Tested for quality and reliability.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -623,7 +609,7 @@ export function StorefrontShell() {
               ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
               : filteredProducts.length === 0 ? (
                   <div className="col-span-full py-16 text-center">
-                    <p className="text-base font-serif text-muted-foreground">
+                    <p className="text-base font-sans text-muted-foreground">
                       No curated products in this view yet.
                     </p>
                   </div>
@@ -643,13 +629,13 @@ export function StorefrontShell() {
         <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
           <div className="rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
             <p className="text-xs uppercase tracking-[0.25em] font-semibold text-accent">
-              The Workspace &amp; Ritual Dispatch
+              The Workspace Gadget Dispatch
             </p>
-            <h2 className="mt-3 font-serif text-3xl sm:text-4xl">
-              Curated engineering infrastructure &amp; quiet luxury to your inbox.
+            <h2 className="mt-3 font-sans text-3xl sm:text-4xl">
+              Curated workspace gadgets &amp; desk hardware to your inbox.
             </h2>
             <p className="mt-3 max-w-xl mx-auto text-sm text-muted-foreground leading-relaxed">
-              Weekly teardowns of mechanical peripheral builds, ergonomic office acoustics, and molecular skincare formulations. Zero fluff.
+              Weekly teardowns of mechanical keyboard builds, ergonomic office chairs, display setups, and workspace gadgets. Zero fluff.
             </p>
             {emailSubscribed ? (
               <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-6 py-2.5 text-xs font-semibold text-emerald-600 border border-emerald-500/20">
@@ -686,7 +672,7 @@ export function StorefrontShell() {
       <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">{preview?.name}</DialogTitle>
+            <DialogTitle className="font-sans text-2xl">{preview?.name}</DialogTitle>
           </DialogHeader>
           {preview && (
             <div className="grid gap-6 sm:grid-cols-2">
@@ -718,15 +704,15 @@ export function StorefrontShell() {
                         `${preview.brand || ''} ${preview.name || ''}`.trim()
                       )}`
                     }
-                    buttonLabel="View on Amazon"
-                    buttonClassName="flex h-14 sm:h-11 w-full items-center justify-center gap-2.5 rounded-full bg-primary px-5 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 shadow-md active:scale-[0.99]"
+                    buttonLabel="Buy on Amazon"
+                    buttonClassName="flex h-12 sm:h-11 w-full items-center justify-center gap-2.5 rounded-full bg-primary px-5 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 shadow-md active:scale-[0.99]"
                   />
                   <Link
                     href={`/products/${preview.slug}`}
                     onClick={() => setPreview(null)}
                     className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-5 text-xs font-semibold uppercase tracking-widest text-foreground transition-all hover:bg-muted"
                   >
-                    <span>Full Editorial &amp; Specs</span>
+                    <span>Read Full Specs & Details</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
                 </div>

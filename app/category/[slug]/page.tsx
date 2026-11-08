@@ -42,7 +42,7 @@ export default async function CategoryPage({
       slug,
       label: navGroup?.label || slug,
       eyebrow: navGroup?.eyebrow || 'Curated Edit',
-      title: navGroup?.tagline || 'Curated Workspace & Ritual Picks',
+      title: navGroup?.tagline || 'Curated Workspace Gadgets & Desk Setup Gear',
       description: navGroup?.description || '',
       image: navGroup?.image || '',
       tone: 'bg-muted/10',
@@ -84,7 +84,7 @@ export default async function CategoryPage({
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:px-8 lg:py-20">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">{category.eyebrow}</p>
-              <h1 className="mt-4 max-w-xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <h1 className="mt-4 max-w-xl font-sans text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 {category.title}
               </h1>
               <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">{category.description}</p>
@@ -111,7 +111,7 @@ export default async function CategoryPage({
           <div className="flex items-end justify-between gap-6 border-b border-border/60 pb-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Curated for you</p>
-              <h2 className="mt-2 font-serif text-3xl tracking-tight sm:text-4xl">Explore the {category.label} edit</h2>
+              <h2 className="mt-2 font-sans text-3xl tracking-tight sm:text-4xl">Explore the {category.label} edit</h2>
             </div>
             <Link href="/" className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-widest text-accent hover:underline sm:flex">
               View homepage <ArrowRight className="size-3.5" />

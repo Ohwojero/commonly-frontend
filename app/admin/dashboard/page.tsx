@@ -349,7 +349,7 @@ function AdminLoginGate({ onLoginSuccess }: { onLoginSuccess: () => void }) {
           <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground mb-3 shadow-md">
             <Lock className="size-6" />
           </div>
-          <CardTitle className="font-serif text-2xl tracking-tight">Admin Authorization</CardTitle>
+          <CardTitle className="font-sans text-2xl tracking-tight">Admin Authorization</CardTitle>
           <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
             Administrator credentials are required to add products, modify catalog entries, and manage store assets.
           </p>
@@ -924,7 +924,7 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-[#F7F7F5] overflow-x-hidden">
       {/* ── Mobile Header ─────────────────────────────────────── */}
       <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
-        <Link href="/" className="font-serif text-xl">Commonlys.</Link>
+        <Link href="/" className="font-sans text-xl">Commonlys.</Link>
         <button type="button" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
           <Menu className="size-5" />
         </button>
@@ -934,7 +934,7 @@ export default function DashboardPage() {
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background transition-transform duration-200 md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:block`}>
         <div className="flex h-16 items-center justify-between border-b px-6">
-          <Link href="/" className="font-serif text-2xl" onClick={() => setSidebarOpen(false)}>Commonlys.</Link>
+          <Link href="/" className="font-sans text-2xl" onClick={() => setSidebarOpen(false)}>Commonlys.</Link>
           <button type="button" className="md:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="size-4" />
           </button>
@@ -1000,7 +1000,7 @@ export default function DashboardPage() {
                 <ChevronRight className="size-3 text-muted-foreground/50 shrink-0" />
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground truncate">{currentNavItem?.label}</span>
               </div>
-              <h1 className="mt-0.5 font-serif text-lg sm:text-xl truncate">{currentNavItem?.label}</h1>
+              <h1 className="mt-0.5 font-sans text-lg sm:text-xl truncate">{currentNavItem?.label}</h1>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {productMessage && (
@@ -1090,7 +1090,7 @@ export default function DashboardPage() {
                   <CardContent className="p-6 flex flex-col justify-center gap-4">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">{spotlight?.brand}</p>
-                      <h2 className="mt-2 font-serif text-2xl leading-snug">{spotlight?.name}</h2>
+                      <h2 className="mt-2 font-sans text-2xl leading-snug">{spotlight?.name}</h2>
                       <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{spotlight?.description}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
@@ -1321,7 +1321,7 @@ export default function DashboardPage() {
                         <div className="relative aspect-[4/1] overflow-hidden bg-muted">
                           <img src={group.image} alt={group.label} className="size-full object-cover" onError={event => { (event.target as HTMLImageElement).src = FALLBACK_IMG }} />
                           <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-                          <div className="absolute inset-4"><p className="font-serif text-xl text-white">{group.label}</p></div>
+                          <div className="absolute inset-4"><p className="font-sans text-xl text-white">{group.label}</p></div>
                         </div>
                       )}
                       <div className="p-4">
@@ -1796,7 +1796,7 @@ export default function DashboardPage() {
           <Card className="max-h-[92vh] w-full max-w-3xl overflow-auto shadow-2xl">
             <CardHeader className="sticky top-0 z-10 border-b bg-background flex-row items-center justify-between py-4">
               <div>
-                <CardTitle className="text-lg font-serif">{editing ? 'Edit Product' : 'New Product'}</CardTitle>
+                <CardTitle className="text-lg font-sans">{editing ? 'Edit Product' : 'New Product'}</CardTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">{editing ? `Editing: ${editing}` : 'Fill in the product details below'}</p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setShowProductForm(false)} aria-label="Close">

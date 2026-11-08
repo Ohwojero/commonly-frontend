@@ -11,7 +11,7 @@ export function RelatedProducts({ products }: { products: Product[] }) {
       <div className="mb-8 flex items-end justify-between gap-4 border-t border-border/60 pt-10">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] font-semibold text-accent">Keep exploring</p>
-          <h2 className="mt-2 font-serif text-3xl sm:text-4xl">You may also like</h2>
+          <h2 className="mt-2 font-sans text-3xl sm:text-4xl">You may also like</h2>
         </div>
         <Link href="/#shop" className="hidden items-center gap-2 text-xs uppercase tracking-widest font-semibold text-accent sm:flex">
           View all picks <ArrowRight className="size-3.5" />

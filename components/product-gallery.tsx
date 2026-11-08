@@ -258,7 +258,7 @@ export function ProductGallery({
 
             {/* Product Title & Share */}
             <div className="mt-2.5 flex items-start justify-between gap-4">
-              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal leading-tight tracking-tight text-foreground">
+              <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-tight text-foreground">
                 {product.name}
               </h1>
               <Button
@@ -326,7 +326,7 @@ export function ProductGallery({
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Sparkles className="size-3.5" />
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-widest text-foreground">
+                  <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-foreground">
                     About this item
                   </span>
                 </div>
@@ -341,7 +341,7 @@ export function ProductGallery({
                     <ul className="mt-3 space-y-2.5">
                       {descData.items.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed">
-                          <span className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-foreground/70" />
+                          <span className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-foreground" />
                           <span className="min-w-0 break-words">
                             {item.label ? (
                               <>
@@ -371,9 +371,9 @@ export function ProductGallery({
                     return (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-[11px] font-medium text-foreground shadow-2xs border border-border/40"
+                        className="inline-flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-[11px] font-semibold text-foreground shadow-2xs border border-border/40"
                       >
-                        <Check className="size-3 text-emerald-600" />
+                        <Check className="size-3 text-emerald-600 stroke-[2.5]" />
                         {textToShow}
                       </span>
                     )
@@ -390,7 +390,7 @@ export function ProductGallery({
                 <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
                   <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Item Details</h3>
+                    <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-foreground">Item Details</h3>
                   </div>
                   <div className="divide-y divide-border/40 px-4 sm:px-5">
                     {toRows(product.itemDetails, []).map((row, i) => (
@@ -399,7 +399,7 @@ export function ProductGallery({
                         className={
                           row.hasLabel
                             ? 'grid min-w-0 grid-cols-[140px_minmax(0,1fr)] sm:grid-cols-[180px_minmax(0,1fr)] gap-3 py-2.5 text-left text-xs leading-relaxed sm:gap-4 sm:text-sm'
-                            : 'py-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground'
+                            : 'py-2.5 text-xs sm:text-sm leading-relaxed text-foreground/90 font-medium'
                         }
                       >
                         {row.hasLabel ? (
@@ -408,7 +408,7 @@ export function ProductGallery({
                             <span className="min-w-0 break-words text-muted-foreground">{row.value}</span>
                           </>
                         ) : (
-                          <span>{row.value}</span>
+                          <span className="text-muted-foreground">{row.value}</span>
                         )}
                       </div>
                     ))}
@@ -421,15 +421,15 @@ export function ProductGallery({
                 <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
                   <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
+                    <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-foreground">Why You Should Buy It</h3>
                   </div>
                   <ul className="divide-y divide-border/40 px-4 sm:px-5">
                     {reconstructItems(product.highlights).map((item, i) => {
                       const { label, value } = parseBullet(item)
                       return (
                         <li key={i} className="flex min-w-0 items-start gap-3 py-3 text-xs leading-relaxed sm:text-sm">
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold tabular-nums text-primary">
-                            {i + 1}
+                          <span className="shrink-0 pt-0.5 font-bold text-foreground tabular-nums select-none min-w-[1.25rem]">
+                            {i + 1}.
                           </span>
                           <span className="min-w-0 break-words pt-0.5">
                             {label ? (
@@ -453,7 +453,7 @@ export function ProductGallery({
                 <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
                   <div className="flex items-center gap-2.5 border-b border-border/50 bg-muted/30 px-4 py-3 sm:px-5">
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Who Can Make Use of It</h3>
+                    <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-foreground">Who Can Make Use of It</h3>
                   </div>
                   <div className="px-4 py-4 sm:px-5">
                     <ul className="space-y-3">
@@ -461,7 +461,9 @@ export function ProductGallery({
                         const { label, value } = parseBullet(tag)
                         return (
                           <li key={`${index}-${tag}`} className="flex items-start gap-3 text-xs leading-relaxed sm:text-sm">
-                            <span className="mt-1.5 flex size-2 shrink-0 rounded-full border-[1.5px] border-primary/70 bg-transparent" />
+                            <span className="mt-0.5 shrink-0 font-bold text-foreground/80 select-none text-base leading-none">
+                              ○
+                            </span>
                             <span className="min-w-0 break-words">
                               {label ? (
                                 <>
@@ -489,7 +491,7 @@ export function ProductGallery({
                   <RegisterGate
                     productSlug={product.slug}
                     affiliateUrl={effectiveAffiliateUrl}
-                    buttonLabel="View on Amazon"
+                    buttonLabel="Buy on Amazon"
                     buttonClassName="w-full inline-flex h-14 sm:h-12 items-center justify-center gap-2.5 rounded-full bg-primary px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99]"
                   />
                 </div>
@@ -560,7 +562,7 @@ export function ProductGallery({
               <RegisterGate
                 productSlug={product.slug}
                 affiliateUrl={effectiveAffiliateUrl}
-                buttonLabel="View on Amazon"
+                buttonLabel="Buy on Amazon"
                 buttonClassName="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-md active:scale-95"
               />
             </div>
@@ -571,7 +573,7 @@ export function ProductGallery({
       {/* Reviews Section */}
       <div id="reviews" className="mx-auto max-w-[1280px] scroll-mt-24 px-4 pb-16 sm:px-6 lg:px-8">
         <div className="border-t border-border/60 pt-10">
-          <h2 className="font-serif text-xl sm:text-2xl font-normal tracking-tight text-foreground mb-6">
+          <h2 className="font-sans text-xl sm:text-2xl font-normal tracking-tight text-foreground mb-6">
             Ratings & Reviews
             {reviewsData && reviewsData.reviewCount > 0 && (
               <span className="ml-3 text-sm font-sans font-normal text-muted-foreground">

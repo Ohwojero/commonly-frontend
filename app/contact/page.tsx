@@ -62,11 +62,11 @@ export default function ContactPage() {
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 lg:grid-cols-[.8fr_1.2fr] lg:px-8 lg:py-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">Get in touch</p>
-            <h1 className="mt-5 font-serif text-5xl leading-[1.02] tracking-tight sm:text-7xl">
+            <h1 className="mt-5 font-sans text-5xl leading-[1.02] tracking-tight sm:text-7xl">
               Let&apos;s talk about the good stuff.
             </h1>
             <p className="mt-7 max-w-md leading-7 text-muted-foreground">
-              Have a product question, a partnership idea, or a thoughtful recommendation? We&apos;d love to hear from you.
+              Have a workspace gadget question, setup suggestion, or partnership idea? We&apos;d love to hear from you.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
@@ -104,7 +104,7 @@ export default function ContactPage() {
           </div>
 
           <div className="border border-border bg-card p-6 sm:p-10">
-            <h2 className="font-serif text-3xl">Send a note</h2>
+            <h2 className="font-sans text-3xl">Send a note</h2>
             {emailOpened ? (
               <div className="mt-10 border-l-2 border-accent pl-5">
                 <p className="font-medium">Your email app should open with your message addressed to {contactEmail}.</p>

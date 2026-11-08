@@ -148,7 +148,7 @@ export default async function SubcategoryPage({
             <p className="mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
               {category.label} / {item}
             </p>
-            <h1 className="mx-auto mt-4 max-w-3xl font-serif text-4xl leading-tight tracking-tight text-white sm:text-6xl">
+            <h1 className="mx-auto mt-4 max-w-3xl font-sans text-4xl leading-tight tracking-tight text-white sm:text-6xl">
               The {item.toLowerCase()} edit.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-base leading-relaxed text-white/80">

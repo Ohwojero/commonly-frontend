@@ -43,7 +43,7 @@ export function CookieBanner() {
             <Cookie className="size-4.5" />
           </div>
           <div>
-            <h3 className="font-serif text-base font-semibold tracking-tight text-foreground">
+            <h3 className="font-sans text-base font-semibold tracking-tight text-foreground">
               Cookie &amp; Affiliate Transparency
             </h3>
             <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">

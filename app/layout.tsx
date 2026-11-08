@@ -5,8 +5,8 @@ import { CookieBanner } from '@/components/cookie-banner'
 import { AuthProvider } from '@/lib/auth-store'
 
 export const metadata: Metadata = {
-  title: 'Commonlys. — Prestige Beauty & Clinical Technology',
-  description: 'An independent editorial curation of molecular skincare, salon-grade hair technology, and FDA-cleared clinical devices.',
+  title: 'Commonlys. — Curated Luxury Beauty & Premium Tech Accessories',
+  description: 'An independent curation of verified luxury beauty, clinical skincare, and high-performance tech & workspace accessories on Amazon.',
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },

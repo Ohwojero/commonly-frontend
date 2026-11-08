@@ -24,7 +24,7 @@ export interface RegisterGateProps {
 export function RegisterGate({
   productSlug,
   affiliateUrl,
-  buttonLabel = 'View on Amazon',
+  buttonLabel = 'Buy on Amazon',
   buttonClassName,
   isOpen: controlledOpen,
   onClose: controlledOnClose,
@@ -172,7 +172,7 @@ export function RegisterGate({
                   <Sparkles className="size-3.5" />
                   {affiliateUrl ? 'Prestige Curations' : 'Commonlys Account'}
                 </p>
-                <h2 id="auth-modal-title" className="mt-2 font-serif text-2xl sm:text-3xl">
+                <h2 id="auth-modal-title" className="mt-2 font-sans text-2xl sm:text-3xl">
                   {mode === 'register'
                     ? affiliateUrl
                       ? 'Join before you shop'
@@ -300,8 +300,8 @@ export function RegisterGate({
                 {loading
                   ? 'Connecting...'
                   : mode === 'register'
-                    ? 'Register & View on Amazon'
-                    : 'Log In & View on Amazon'}
+                    ? `Register & ${buttonLabel}`
+                    : `Log In & ${buttonLabel}`}
               </Button>
             </form>
 

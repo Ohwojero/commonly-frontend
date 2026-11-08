@@ -89,49 +89,49 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
       <CardContent className="flex flex-1 flex-col justify-between gap-4 p-5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/70">
               {product.brand}
             </p>
             <Link
               href={`/products/${product.slug}#reviews`}
               aria-label={`View reviews for ${product.name}`}
-              className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+              className="flex items-center gap-1 text-[11px] text-foreground/70 transition-colors hover:text-foreground"
             >
               <Star className="size-3 fill-amber-400 text-amber-400" />
               <span className="font-semibold text-foreground">{product.rating}</span>
-              <span className="text-muted-foreground/75">({product.reviewCount?.toLocaleString() ?? 0})</span>
+              <span className="text-muted-foreground">({product.reviewCount?.toLocaleString() ?? 0})</span>
             </Link>
           </div>
 
           <Link href={`/products/${product.slug}`} className="block">
-            <h3 className="mt-2 line-clamp-2 font-serif text-lg leading-snug tracking-tight text-foreground transition-colors hover:text-accent">
+            <h3 className="mt-2 line-clamp-2 font-sans text-lg font-semibold leading-snug tracking-tight text-foreground transition-colors hover:text-accent">
               {product.name}
             </h3>
           </Link>
 
-          <p className="mt-1.5 text-xs text-muted-foreground/80">
+          <p className="mt-1.5 text-xs font-medium text-muted-foreground">
             {product.subcategory || product.category}
           </p>
 
-          <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="mt-2.5 flex items-center justify-between text-[11px]">
+            <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-semibold">
+              <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
               Verified In Stock
             </span>
-            <span className="text-muted-foreground/70">Live Amazon Pricing</span>
+            <span className="text-muted-foreground font-medium">Live Amazon Pricing</span>
           </div>
         </div>
 
-        {/* Action Button */}
+        {/* Action Button: Buy on Amazon */}
         <div className="mt-3">
           <RegisterGate
             productSlug={product.slug}
             affiliateUrl={
               product.affiliateUrl ||
-              `https://www.amazon.com/s?k=${encodeURIComponent(`${product.brand || ''} ${product.name || ''}`.trim())}`
+              `https://www.amazon.com/s?k=${encodeURIComponent(`${product.brand} ${product.name}`)}`
             }
-            buttonLabel="View on Amazon"
-            buttonClassName="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow"
+            buttonLabel="Buy on Amazon"
+            buttonClassName="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow active:scale-[0.99]"
           />
         </div>
       </CardContent>

@@ -240,8 +240,8 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs font-medium tracking-wider text-primary-foreground">
-        Curated with Care · Peak Workspace Tech &amp; Quiet Luxury Rituals · Amazon Prime Verified
+      <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs font-bold tracking-wider text-primary-foreground uppercase">
+        Curated Luxury Beauty &amp; Premium Tech Accessories
       </div>
       <header className="fixed inset-x-0 top-8 z-50 border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
@@ -252,7 +252,7 @@ export function SiteHeader() {
           >
             {open ? <X /> : <Menu />}
           </button>
-          <Link href="/" className="shrink-0 font-serif text-2xl tracking-tight">
+          <Link href="/" className="shrink-0 font-sans text-2xl font-bold tracking-tight">
             Commonlys.
           </Link>
           <nav
@@ -347,13 +347,11 @@ export function SiteFooter() {
     <footer className="border-t bg-primary px-5 py-14 text-primary-foreground lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
         <div>
-          <Link href="/" className="font-serif text-3xl">
+          <Link href="/" className="font-sans text-3xl">
             Commonlys.
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-6 text-primary-foreground/75">
-            Where peak productivity infrastructure meets quiet luxury self-care. An independent
-            curation of elite software engineer workspaces, clinical skincare, and premium
-            workspace tech.
+            An independent gadget collation platform for high-performance workspaces. We research, test, and collate the finest ergonomic seating, developer compute gear, and desk productivity tools.
           </p>
         </div>
         <div>
@@ -422,7 +420,7 @@ export function SiteFooter() {
               href="/category/personal-edit/clinical-tech"
               className="hover:text-primary-foreground"
             >
-              Clinical Tech
+              Clinical Beauty Tech
             </Link>
             <Link
               href="/category/studio-edit/productivity-displays"
@@ -431,10 +429,10 @@ export function SiteFooter() {
               Productivity Displays
             </Link>
             <Link
-              href="/category/studio-edit/acoustic-audio"
+              href="/category/studio-edit/thunderbolt-hubs-compute"
               className="hover:text-primary-foreground"
             >
-              Acoustic &amp; Audio
+              Thunderbolt &amp; Compute
             </Link>
             <Link
               href="/category/ergonomic-edit/executive-seating"

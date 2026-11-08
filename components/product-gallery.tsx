@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Check,
+  ChevronLeft,
   ChevronRight,
   Heart,
   RotateCcw,
@@ -51,6 +52,32 @@ export function ProductGallery({
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [editingReview, setEditingReview] = useState(false)
+
+  // Desktop empty-space product carousel state
+  const [carouselIndex, setCarouselIndex] = useState(0)
+  const [carouselPaused, setCarouselPaused] = useState(false)
+  const carouselPageSize = 2
+  const totalCarouselPages = Math.ceil((relatedProducts?.length || 0) / carouselPageSize)
+
+  const handleNextCarouselPage = () => {
+    setCarouselIndex((prev) => (prev + 1 >= totalCarouselPages ? 0 : prev + 1))
+  }
+  const handlePrevCarouselPage = () => {
+    setCarouselIndex((prev) => (prev - 1 < 0 ? Math.max(0, totalCarouselPages - 1) : prev - 1))
+  }
+
+  useEffect(() => {
+    if (!relatedProducts || relatedProducts.length <= carouselPageSize || carouselPaused) return
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1 >= totalCarouselPages ? 0 : prev + 1))
+    }, 7000)
+    return () => clearInterval(timer)
+  }, [relatedProducts, totalCarouselPages, carouselPaused])
+
+  const visibleCarouselProducts = relatedProducts ? relatedProducts.slice(
+    carouselIndex * carouselPageSize,
+    carouselIndex * carouselPageSize + carouselPageSize
+  ) : []
 
   useEffect(() => {
     incrementProductView(product.slug).catch(() => {})
@@ -181,67 +208,195 @@ export function ProductGallery({
         </nav>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,.85fr)] lg:gap-12">
-          {/* Product Gallery Section */}
-          <section className="flex min-w-0 flex-col-reverse gap-3.5 sm:grid sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-4">
-            {/* Thumbnails: horizontal scroll on mobile, vertical stack on desktop */}
-            <div className="flex gap-2.5 overflow-x-auto pb-1 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-none">
-              {images.map((image, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label={`View product image ${index + 1}`}
-                  aria-pressed={activeImage === index}
-                  onClick={() => setActiveImage(index)}
-                  className={`size-14 sm:size-16 shrink-0 aspect-square overflow-hidden rounded-xl border-2 bg-muted transition-all duration-200 ${
-                    activeImage === index
-                      ? 'border-primary ring-2 ring-primary/20 opacity-100'
-                      : 'border-transparent opacity-60 hover:opacity-100 hover:border-border'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`Product view ${index + 1}`}
-                    className="size-full bg-white object-contain p-1"
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).src = FALLBACK_IMG
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Main Image with Zoom */}
-            <div
-              className="relative flex min-w-0 aspect-[4/3] min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-white shadow-xs sm:min-h-0"
-            >
-              <img
-                src={images[activeImage]}
-                alt={`${product.name} - image ${activeImage + 1}`}
-                className="size-full object-contain p-5 transition-opacity duration-200 sm:p-8"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).src = FALLBACK_IMG
-                }}
-              />
-
-              {/* Quick Action Overlay: Wishlist */}
-              <div className="absolute right-4 top-4">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  disabled={saveLoading}
-                  onClick={handleToggleSave}
-                  aria-label={saved ? 'Remove from saved' : 'Save product'}
-                  className={`size-10 rounded-full shadow-sm backdrop-blur-md transition-all ${
-                    saved
-                      ? 'bg-rose-500 text-white hover:bg-rose-600'
-                      : 'bg-background/80 text-foreground hover:bg-background'
-                  } ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Heart className={`size-4.5 ${saved ? 'fill-current' : ''}`} />
-                </Button>
+          {/* Left Column: Product Gallery & Desktop-Only Curated Products Carousel */}
+          <div className="flex min-w-0 flex-col gap-5">
+            {/* Product Gallery Section */}
+            <section className="flex min-w-0 flex-col-reverse gap-3.5 sm:grid sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-4">
+              {/* Thumbnails: horizontal scroll on mobile, vertical stack on desktop */}
+              <div className="flex gap-2.5 overflow-x-auto pb-1 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-none">
+                {images.map((image, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`View product image ${index + 1}`}
+                    aria-pressed={activeImage === index}
+                    onClick={() => setActiveImage(index)}
+                    className={`size-14 sm:size-16 shrink-0 aspect-square overflow-hidden rounded-xl border-2 bg-muted transition-all duration-200 ${
+                      activeImage === index
+                        ? 'border-primary ring-2 ring-primary/20 opacity-100'
+                        : 'border-transparent opacity-60 hover:opacity-100 hover:border-border'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Product view ${index + 1}`}
+                      className="size-full bg-white object-contain p-1"
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).src = FALLBACK_IMG
+                      }}
+                    />
+                  </button>
+                ))}
               </div>
-            </div>
-          </section>
+
+              {/* Main Image with Zoom */}
+              <div
+                className="relative flex min-w-0 aspect-[4/3] min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-white shadow-xs sm:min-h-0"
+              >
+                <img
+                  src={images[activeImage]}
+                  alt={`${product.name} - image ${activeImage + 1}`}
+                  className="size-full object-contain p-5 transition-opacity duration-200 sm:p-8"
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).src = FALLBACK_IMG
+                  }}
+                />
+
+                {/* Quick Action Overlay: Wishlist */}
+                <div className="absolute right-4 top-4">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    disabled={saveLoading}
+                    onClick={handleToggleSave}
+                    aria-label={saved ? 'Remove from saved' : 'Save product'}
+                    className={`size-10 rounded-full shadow-sm backdrop-blur-md transition-all ${
+                      saved
+                        ? 'bg-rose-500 text-white hover:bg-rose-600'
+                        : 'bg-background/80 text-foreground hover:bg-background'
+                    } ${saveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <Heart className={`size-4.5 ${saved ? 'fill-current' : ''}`} />
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            {/* Desktop-Only Empty-Space Filler: Curated Products Carousel */}
+            {relatedProducts && relatedProducts.length > 0 && (
+              <div className="hidden lg:block">
+                <div
+                  className="overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all"
+                  onMouseEnter={() => setCarouselPaused(true)}
+                  onMouseLeave={() => setCarouselPaused(false)}
+                >
+                  {/* Carousel Header */}
+                  <div className="flex items-center justify-between pb-3.5 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Sparkles className="size-3.5" />
+                      </span>
+                      <div>
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">
+                          More Curated Picks
+                        </h3>
+                        <p className="text-[11px] text-muted-foreground">
+                          Tested &amp; verified on Amazon Prime
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Navigation Controls */}
+                    {totalCarouselPages > 1 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-medium text-muted-foreground mr-1 tabular-nums">
+                          {carouselIndex + 1} / {totalCarouselPages}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handlePrevCarouselPage}
+                          aria-label="Previous curated products"
+                          className="grid size-7 place-items-center rounded-full border border-border bg-background text-foreground transition-all hover:bg-muted active:scale-95"
+                        >
+                          <ChevronLeft className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleNextCarouselPage}
+                          aria-label="Next curated products"
+                          className="grid size-7 place-items-center rounded-full border border-border bg-background text-foreground transition-all hover:bg-muted active:scale-95"
+                        >
+                          <ChevronRight className="size-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Cards Grid (2 items side-by-side) */}
+                  <div className="grid grid-cols-2 gap-3.5 pt-4">
+                    {visibleCarouselProducts.map((item) => (
+                      <div
+                        key={item.slug}
+                        className="group flex flex-col justify-between overflow-hidden rounded-xl border border-border/60 bg-muted/20 p-3 transition-all hover:border-accent/40 hover:bg-muted/40 hover:shadow-xs"
+                      >
+                        <div>
+                          <Link
+                            href={`/products/${item.slug}`}
+                            className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg bg-white border border-border/40 p-2.5"
+                          >
+                            <img
+                              src={item.image || FALLBACK_IMG}
+                              alt={item.name}
+                              className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
+                              onError={(e) => {
+                                ;(e.target as HTMLImageElement).src = FALLBACK_IMG
+                              }}
+                            />
+                          </Link>
+                          <div className="mt-2.5">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              {item.brand}
+                            </p>
+                            <Link href={`/products/${item.slug}`} className="block">
+                              <h4 className="mt-0.5 line-clamp-2 text-xs font-semibold leading-snug text-foreground transition-colors hover:text-accent">
+                                {item.name}
+                              </h4>
+                            </Link>
+                            <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                              <Star className="size-3 fill-amber-400 text-amber-400" />
+                              <span className="font-semibold text-foreground">{item.rating}</span>
+                              <span className="text-[10px] text-muted-foreground/75">
+                                ({item.reviewCount || 0})
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <RegisterGate
+                            productSlug={item.slug}
+                            affiliateUrl={
+                              item.affiliateUrl ||
+                              `https://www.amazon.com/s?k=${encodeURIComponent(`${item.brand || ''} ${item.name || ''}`.trim())}`
+                            }
+                            buttonLabel="Buy on Amazon"
+                            buttonClassName="flex h-8 w-full items-center justify-center gap-1.5 rounded-full bg-primary px-3 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow-2xs transition-all hover:bg-primary/90 active:scale-[0.99]"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination Dots Indicator */}
+                  {totalCarouselPages > 1 && (
+                    <div className="mt-4 flex items-center justify-center gap-1.5">
+                      {Array.from({ length: totalCarouselPages }).map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setCarouselIndex(idx)}
+                          aria-label={`Go to slide ${idx + 1}`}
+                          className={`h-1.5 rounded-full transition-all ${
+                            carouselIndex === idx ? 'w-5 bg-primary' : 'w-1.5 bg-border hover:bg-muted-foreground/40'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Product Details & Editorial Section */}
           <section className="flex min-w-0 flex-col lg:pt-1">

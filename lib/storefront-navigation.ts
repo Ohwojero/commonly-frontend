@@ -157,7 +157,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
         items: [
           'Solid Wood Desk Tops',
           'Motorized Standing Frames',
-          'Minimalist Leather Desk Pads',
+          '4K AI Smart Dash Cams',
         ],
       },
       {
@@ -172,7 +172,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Active Posture Stools',
       'Solid Wood Desk Tops',
       'Motorized Standing Frames',
-      'Minimalist Leather Desk Pads',
+      '4K AI Smart Dash Cams',
       'Custom Mechanical Keyboards',
       'Ergonomic Vertical Mice',
     ],

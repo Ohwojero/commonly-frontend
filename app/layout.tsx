@@ -5,8 +5,8 @@ import { CookieBanner } from '@/components/cookie-banner'
 import { AuthProvider } from '@/lib/auth-store'
 
 export const metadata: Metadata = {
-  title: 'Commonlys. — Curated Luxury Beauty & Premium Tech Accessories',
-  description: 'An independent curation of verified luxury beauty, clinical skincare, and high-performance tech & workspace accessories on Amazon.',
+  title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
+  description: 'An independent curation of verified high-performance personal tech, smart automotive gear, and workspace architecture on Amazon.',
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },

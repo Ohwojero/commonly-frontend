@@ -180,7 +180,7 @@ export function StorefrontShell() {
             <Search className="size-4 text-muted-foreground" />
             <Input
               autoFocus
-              placeholder="Search workspace gadgets, ergonomic chairs, mechanical keyboards, vertical monitors..."
+              placeholder="Search dash cams, EV chargers, ergonomic chairs, standing desks, vertical monitors..."
               className="border-0 bg-transparent shadow-none focus-visible:ring-0"
             />
             <Button
@@ -226,16 +226,15 @@ export function StorefrontShell() {
               <div className="flex flex-col justify-center">
                 <div className="inline-flex w-fit items-center gap-1.5 sm:gap-2 rounded-full border border-amber-300/40 bg-amber-400/15 px-3.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
                   <Sparkles className="size-3 text-amber-300 sm:size-3.5 shrink-0" />
-                  <span>Luxury Beauty &amp; Tech Accessories</span>
+                  <span>Workspace &amp; Personal Tech Gear</span>
                 </div>
 
                 <h1 className="mt-4 sm:mt-6 max-w-3xl font-sans text-3xl sm:text-5xl lg:text-7xl leading-[1.08] sm:leading-[1.02] tracking-tight text-white uppercase font-bold">
-                  CURATED LUXURY BEAUTY &amp; PREMIUM TECH ACCESSORIES.
+                  CURATED HIGH-PERFORMANCE WORKSPACE &amp; PERSONAL TECH GEAR.
                 </h1>
 
                 <p className="mt-3.5 sm:mt-6 max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed sm:leading-8 text-white/90 font-normal">
-                  Straightforward, honest curation on Amazon across two focused worlds:
-                  clinical luxury skincare &amp; beauty devices, and high-performance workspace &amp; tech accessories.
+                  Straightforward, honest curation on Amazon across high-performance workspace hardware, studio compute, and intelligent personal tech gear.
                   We test the specs, cut through the marketing noise, and link directly to verified Amazon Prime products with 30-day returns.
                 </p>
 
@@ -244,14 +243,14 @@ export function StorefrontShell() {
                     href="/category/personal-edit"
                     className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
                   >
-                    <span>Shop Luxury Beauty</span>
+                    <span>Shop Personal Tech</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
                   <Link
                     href="#categories"
                     className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full border border-white/35 bg-white/10 px-7 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-[0.98] text-center"
                   >
-                    <span>Shop Tech &amp; Workspace</span>
+                    <span>Shop Workspace Hardware</span>
                   </Link>
                 </div>
               </div>
@@ -361,9 +360,9 @@ export function StorefrontShell() {
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
                 <Sparkles className="size-5" />
               </div>
-              <h3 className="mt-3 font-sans text-base font-bold">Luxury Skincare &amp; Beauty Tech</h3>
+              <h3 className="mt-3 font-sans text-base font-bold">Smart Personal &amp; Mobility Tech</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
-                High-purity clinical serums, anti-aging LED light therapy, and molecular bond repair hair tech.
+                High-performance 4K vision AI dash cams, portable EV chargers, and precision smart hardware.
               </p>
             </div>
             <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
@@ -403,9 +402,9 @@ export function StorefrontShell() {
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
                 Our Curated Collections
               </p>
-              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Shop by Beauty &amp; Tech Category</h2>
+              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Shop by Tech Category</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground font-medium">
-                Browse our focused edits across clinical luxury beauty, studio audio &amp; displays, and ergonomic workspace hardware.
+                Browse our focused edits across personal tech, studio compute &amp; displays, and ergonomic workspace hardware.
               </p>
             </div>
             <p className="shrink-0 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -555,9 +554,9 @@ export function StorefrontShell() {
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
                 Curated Selection
               </p>
-              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Top-Rated Beauty &amp; Tech Picks</h2>
+              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Top-Rated Tech Picks</h2>
               <p className="mt-2 text-sm text-muted-foreground font-medium">
-                Verified luxury skincare, salon hair tech, studio compute, and ergonomic seating on Amazon. Tested for quality and reliability.
+                Verified smart automotive gear, portable EV chargers, studio compute, and ergonomic seating on Amazon. Tested for quality and reliability.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -629,13 +628,13 @@ export function StorefrontShell() {
         <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
           <div className="rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
             <p className="text-xs uppercase tracking-[0.25em] font-semibold text-accent">
-              The Workspace Gadget Dispatch
+              The Tech Gear Dispatch
             </p>
             <h2 className="mt-3 font-sans text-3xl sm:text-4xl">
-              Curated workspace gadgets &amp; desk hardware to your inbox.
+              Curated high-performance tech gear &amp; workspace hardware to your inbox.
             </h2>
             <p className="mt-3 max-w-xl mx-auto text-sm text-muted-foreground leading-relaxed">
-              Weekly teardowns of mechanical keyboard builds, ergonomic office chairs, display setups, and workspace gadgets. Zero fluff.
+              Weekly teardowns of smart automotive gear, EV charging systems, ergonomic office setups, and workspace hardware. Zero fluff.
             </p>
             {emailSubscribed ? (
               <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-6 py-2.5 text-xs font-semibold text-emerald-600 border border-emerald-500/20">

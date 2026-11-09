@@ -241,7 +241,7 @@ export function SiteHeader() {
   return (
     <>
       <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs font-bold tracking-wider text-primary-foreground uppercase">
-        Curated Luxury Beauty &amp; Premium Tech Accessories
+        Curated High-Performance Workspace &amp; Personal Tech Gear
       </div>
       <header className="fixed inset-x-0 top-8 z-50 border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
@@ -351,7 +351,7 @@ export function SiteFooter() {
             Commonlys.
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-6 text-primary-foreground/75">
-            An independent gadget collation platform for high-performance workspaces. We research, test, and collate the finest ergonomic seating, developer compute gear, and desk productivity tools.
+            An independent tech curation platform for high-performance personal and workspace gear. We research, test, and collate the finest smart automotive tech, EV charging systems, studio compute, and ergonomic workspace hardware.
           </p>
         </div>
         <div>
@@ -411,16 +411,16 @@ export function SiteFooter() {
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/80">
             <Link
-              href="/category/personal-edit/luxury-skincare"
+              href="/category/personal-edit/automotive-smart-tech"
               className="hover:text-primary-foreground"
             >
-              Luxury Skincare
+              Smart Automotive Tech
             </Link>
             <Link
-              href="/category/personal-edit/clinical-tech"
+              href="/category/personal-edit/ev-charging-power"
               className="hover:text-primary-foreground"
             >
-              Clinical Beauty Tech
+              Smart EV Charging
             </Link>
             <Link
               href="/category/studio-edit/productivity-displays"
@@ -445,8 +445,7 @@ export function SiteFooter() {
               className="hover:text-primary-foreground"
             >
               Aesthetic Desk Systems
-            </Link>
-          </div>
+            </Link>          </div>
         </div>
       </div>
       <div className="mx-auto mt-14 flex max-w-7xl flex-col gap-3 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between">

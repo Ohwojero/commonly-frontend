@@ -502,7 +502,7 @@ export default function DashboardPage() {
           slug: p.slug,
           name: p.name,
           brand: p.brand,
-          category: p.subcategory?.category?.label || p.subcategory?.label || 'Luxury Skincare',
+          category: p.subcategory?.category?.label || p.subcategory?.label || 'Smart Automotive Tech',
           subcategory: p.subcategory?.label,
           subcategorySlug: p.subcategory?.slug,
           categorySlug: p.subcategory?.category?.slug,
@@ -1292,7 +1292,7 @@ export default function DashboardPage() {
                   <form onSubmit={saveCategory} className="space-y-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Category Name</label>
-                      <Input value={categoryForm.label} onChange={event => setCategoryForm({ ...categoryForm, label: event.target.value })} placeholder="e.g. Luxury Skincare" required />
+                      <Input value={categoryForm.label} onChange={event => setCategoryForm({ ...categoryForm, label: event.target.value })} placeholder="e.g. Smart Automotive Tech" required />
                     </div>
                     <ImagePicker value={categoryForm.image} onChange={value => setCategoryForm({ ...categoryForm, image: value })} label="Hero Image" />
                     <div className="flex gap-2">
@@ -1812,11 +1812,11 @@ export default function DashboardPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium">Product Name *</label>
-                      <Input value={form.name} onChange={e => update('name', e.target.value)} placeholder="e.g. Hyaluronic Serum" required />
+                      <Input value={form.name} onChange={e => update('name', e.target.value)} placeholder="e.g. 4K Dual Dash Cam" required />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium">Brand *</label>
-                      <Input value={form.brand} onChange={e => update('brand', e.target.value)} placeholder="e.g. Dr. Barbara Sturm" required />
+                      <Input value={form.brand} onChange={e => update('brand', e.target.value)} placeholder="e.g. Vantrue" required />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-medium">Category *</label>

@@ -129,7 +129,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
     tagline: 'Engineered seating, standing desks & tactile layouts',
     description:
       'Executive task seating, solid hardwood motorized desk systems, and custom mechanical layouts for sustained cognitive flow.',
-    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'Mechanical Keyboards'],
+    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'EV Charging Systems'],
     image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=85',
     catalogSlugs: [
       'ergonomic-edit',
@@ -163,7 +163,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       {
         label: 'Peripheral Layouts',
         slug: 'peripheral-layouts',
-        items: ['Custom Mechanical Keyboards', 'Ergonomic Vertical Mice'],
+        items: ['Smart Portable EV Charging Systems', 'Ergonomic Vertical Mice'],
       },
     ],
     items: [
@@ -173,7 +173,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Solid Wood Desk Tops',
       'Motorized Standing Frames',
       '4K AI Smart Dash Cams',
-      'Custom Mechanical Keyboards',
+      'Smart Portable EV Charging Systems',
       'Ergonomic Vertical Mice',
     ],
   },

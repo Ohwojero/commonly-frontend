@@ -5,7 +5,7 @@ import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory, getSubcategoryImage } from '@/lib/categories'
 import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
-import { products as fallbackProducts } from '@/lib/products'
+import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +50,7 @@ export default async function SubcategoryPage({
 
     if (foundSub) {
       item = foundSub.label
-      heroImage = foundSub.image || getSubcategoryImage(subSlug, raw.image)
+      heroImage = getSubcategoryImage(subSlug, '') || foundSub.image || navGroup?.image || raw.image
     } else {
       if (navGroup) {
         const subNicheMatch = navGroup.subNiches.find(
@@ -60,7 +60,15 @@ export default async function SubcategoryPage({
         if (subNicheMatch) item = subNicheMatch.label
         else if (navItemMatch) item = navItemMatch
       }
-      heroImage = getSubcategoryImage(subSlug, raw?.image || navGroup?.image || '')
+      heroImage = getSubcategoryImage(subSlug, '') || navGroup?.image || raw?.image || ''
+    }
+
+    if (navGroup) {
+      category.label = navGroup.label
+      if (navGroup.image) {
+        category.image = navGroup.image
+      }
+
     }
   } catch {
     category = {
@@ -91,6 +99,7 @@ export default async function SubcategoryPage({
   const seenIds = new Set<string>()
   let rawProducts = rawProductsArrays.flat().filter((p) => {
     if (seenIds.has(p.id)) return false
+    if (!isNotDummyProduct(p.slug)) return false
     seenIds.add(p.id)
     return true
   })
@@ -152,7 +161,7 @@ export default async function SubcategoryPage({
               The {item.toLowerCase()} edit.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-base leading-relaxed text-white/80">
-              Explore clinical and luxury products selected for {item.toLowerCase()}, with detailed ingredient breakdowns and verified Amazon fulfillment.
+              Explore verified high-performance tech products selected for {item.toLowerCase()}, with rigorous specification teardowns and direct Amazon fulfillment.
             </p>
           </div>
         </section>

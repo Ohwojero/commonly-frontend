@@ -474,7 +474,7 @@ export function ProductGallery({
               )}
             </div>
 
-            {/* Clinical Editorial Verdict / About this item Card */}
+            {/* Technical Editorial Verdict / About this item Card */}
             <div className="mt-5 rounded-2xl border border-border/70 bg-gradient-to-br from-muted/30 to-muted/10 p-4 sm:p-5 shadow-2xs">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">

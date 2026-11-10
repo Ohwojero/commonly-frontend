@@ -5,7 +5,7 @@ import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory } from '@/lib/categories'
 import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
-import { products as fallbackProducts } from '@/lib/products'
+import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +56,7 @@ export default async function CategoryPage({
   const seenIds = new Set<string>()
   const rawProducts = rawProductsArrays.flat().filter((p) => {
     if (seenIds.has(p.id)) return false
+    if (!isNotDummyProduct(p.slug)) return false
     seenIds.add(p.id)
     return true
   })

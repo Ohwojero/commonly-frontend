@@ -38,10 +38,24 @@ function DropdownGroup({
     setSelectedSubNiche((prev) => (prev === subLabel ? null : subLabel))
   }
 
-  const isFourCols = group.subNiches.length >= 4
-  const colsWidthClass = isFourCols
-    ? 'md:w-[780px] lg:w-[840px] md:grid-cols-4'
-    : 'md:w-[640px] lg:w-[700px] md:grid-cols-3'
+  const numSubNiches = group.subNiches.length
+  const widthClass =
+    numSubNiches >= 4
+      ? 'md:w-[780px] lg:w-[840px]'
+      : numSubNiches === 3
+      ? 'md:w-[620px] lg:w-[680px]'
+      : numSubNiches === 2
+      ? 'md:w-[480px] lg:w-[540px]'
+      : 'md:w-[320px]'
+
+  const gridColsClass =
+    numSubNiches >= 4
+      ? 'md:grid-cols-4'
+      : numSubNiches === 3
+      ? 'md:grid-cols-3'
+      : numSubNiches === 2
+      ? 'md:grid-cols-2'
+      : 'md:grid-cols-1'
 
   const isPersonalEdit = group.slug === 'personal-edit'
   const desktopPositionClass = isPersonalEdit
@@ -105,7 +119,7 @@ function DropdownGroup({
       <div
         className={`${
           open ? 'block' : 'hidden'
-        } relative mt-1 border-border bg-background md:absolute md:top-full md:z-[70] md:mt-1 md:rounded-2xl md:border md:bg-background/98 md:p-5 lg:p-6 md:shadow-2xl md:backdrop-blur-xl max-w-[calc(100vw-2rem)] ${desktopPositionClass} ${colsWidthClass}`}
+        } relative mt-1 border-border bg-background md:absolute md:top-full md:z-[70] md:mt-1 md:rounded-2xl md:border md:bg-background/98 md:p-5 lg:p-6 md:shadow-2xl md:backdrop-blur-xl max-w-[calc(100vw-2rem)] ${desktopPositionClass} ${widthClass}`}
       >
         {/* Editorial Header (Desktop) */}
         <div className="hidden border-b border-border/60 pb-2.5 mb-3.5 md:col-span-full md:flex md:items-center md:justify-between">
@@ -131,9 +145,7 @@ function DropdownGroup({
 
         {/* Sub-niches & child items */}
         <div
-          className={`grid gap-4 p-1 md:col-span-full md:gap-5 lg:gap-6 md:p-0 ${
-            isFourCols ? 'md:grid-cols-4' : 'md:grid-cols-3'
-          }`}
+          className={`grid gap-4 p-1 md:col-span-full md:gap-5 lg:gap-6 md:p-0 ${gridColsClass}`}
         >
           {group.subNiches.map((subNiche) => {
             const isExpanded = !!mobileExpanded[subNiche.label]
@@ -241,7 +253,7 @@ export function SiteHeader() {
   return (
     <>
       <div className="fixed inset-x-0 top-0 z-[60] bg-primary px-4 py-2 text-center text-xs font-bold tracking-wider text-primary-foreground uppercase">
-        Curated High-Performance Workspace &amp; Personal Tech Gear
+        Curated High-Performance Workspace &amp; Everyday Tech Gear
       </div>
       <header className="fixed inset-x-0 top-8 z-50 border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
@@ -411,16 +423,16 @@ export function SiteFooter() {
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/80">
             <Link
-              href="/category/personal-edit/automotive-smart-tech"
+              href="/category/personal-edit/smart-home-security"
               className="hover:text-primary-foreground"
             >
-              Smart Automotive Tech
+              Smart Home &amp; Security
             </Link>
             <Link
-              href="/category/personal-edit/ev-charging-power"
+              href="/category/personal-edit/vehicle-power-precision"
               className="hover:text-primary-foreground"
             >
-              Smart EV Charging
+              Vehicle, Power &amp; Culinary
             </Link>
             <Link
               href="/category/studio-edit/productivity-displays"

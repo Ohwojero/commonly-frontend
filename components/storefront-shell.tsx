@@ -25,7 +25,7 @@ import { SiteHeader, SiteFooter } from '@/components/site-header'
 import { ProductCard } from '@/components/product-card'
 import { RegisterGate } from '@/components/register-gate'
 import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
-import { products as fallbackProducts } from '@/lib/products'
+import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 // Map ApiProduct to frontend-friendly display shape
 function toDisplayProduct(p: ApiProduct) {
@@ -75,7 +75,12 @@ export function StorefrontShell() {
       .catch(() => [])
       .then((productsData) => {
         if (productsData && productsData.length > 0) {
-          setAllProducts(productsData.map(toDisplayProduct))
+          const valid = productsData.filter((p) => isNotDummyProduct(p.slug))
+          if (valid.length > 0) {
+            setAllProducts(valid.map(toDisplayProduct))
+          } else {
+            setAllProducts(fallbackProducts as any)
+          }
         } else {
           setAllProducts(fallbackProducts as any)
         }
@@ -226,11 +231,11 @@ export function StorefrontShell() {
               <div className="flex flex-col justify-center">
                 <div className="inline-flex w-fit items-center gap-1.5 sm:gap-2 rounded-full border border-amber-300/40 bg-amber-400/15 px-3.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
                   <Sparkles className="size-3 text-amber-300 sm:size-3.5 shrink-0" />
-                  <span>Workspace &amp; Personal Tech Gear</span>
+                  <span>Workspace &amp; Everyday Tech Gear</span>
                 </div>
 
                 <h1 className="mt-4 sm:mt-6 max-w-3xl font-sans text-3xl sm:text-5xl lg:text-7xl leading-[1.08] sm:leading-[1.02] tracking-tight text-white uppercase font-bold">
-                  CURATED HIGH-PERFORMANCE WORKSPACE &amp; PERSONAL TECH GEAR.
+                  CURATED HIGH-PERFORMANCE WORKSPACE &amp; EVERYDAY TECH GEAR.
                 </h1>
 
                 <p className="mt-3.5 sm:mt-6 max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed sm:leading-8 text-white/90 font-normal">
@@ -243,7 +248,7 @@ export function StorefrontShell() {
                     href="/category/personal-edit"
                     className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
                   >
-                    <span>Shop Personal Tech</span>
+                    <span>Shop Everyday Tech</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
                   <Link

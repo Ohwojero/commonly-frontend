@@ -14,10 +14,23 @@ export type Category = {
 
 // ── Image map for subcategory hero images (managed dynamically via API) ──────
 
-export const subcategoryImages: Record<string, string> = {}
+export const subcategoryImages: Record<string, string> = {
+  'smart-thermostats': 'https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=1400&q=85',
+  'smart-doorbells': 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1400&q=85',
+  'security-cameras': 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1400&q=85',
+  'escort-max-360c-mkii-connected-radar': 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1400&q=85',
+  'anova-precision-smart-combi-steam-oven': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1400&q=85',
+  'ecoflow-delta-2-1024wh-lifepo4': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=1400&q=85',
+  'executive-seating': 'https://images.unsplash.com/photo-1580481077195-c3a821a506cb?auto=format&fit=crop&w=1400&q=85',
+  'aesthetic-desk-systems': 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1400&q=85',
+  'peripheral-layouts': 'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=1400&q=85',
+  'ultra-wide-screens': 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1400&q=85',
+  'enterprise-docking-stations': 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1400&q=85',
+  'audiophile-headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1400&q=85',
+}
 
 export function getSubcategoryImage(subcategorySlug: string, categoryImage: string): string {
-  return subcategoryImages[subcategorySlug] || categoryImage || '/luxury-placeholder.svg'
+  return subcategoryImages[subcategorySlug] || categoryImage || 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1400&q=85'
 }
 
 // ── Convert API category to frontend Category type ────────────────────────

@@ -27,6 +27,7 @@ export const subcategoryImages: Record<string, string> = {
   'ultra-wide-screens': 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1400&q=85',
   'enterprise-docking-stations': 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1400&q=85',
   'audiophile-headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1400&q=85',
+  'smart-portable-ev-charging-systems': 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1400&q=85',
 }
 
 export function getSubcategoryImage(subcategorySlug: string, categoryImage: string): string {

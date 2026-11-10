@@ -151,13 +151,12 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
         items: [
           'Solid Wood Desk Tops',
           'Motorized Standing Frames',
-          'Heavy-Duty Monitor Arm Mounts',
         ],
       },
       {
         label: 'Peripheral Layouts',
         slug: 'peripheral-layouts',
-        items: ['Ergonomic Vertical Mice', 'Custom Mechanical Keyboards'],
+        items: ['Ergonomic Vertical Mice', 'Smart Portable EV Charging Systems', '4K AI Smart Dash Cams'],
       },
     ],
     items: [
@@ -166,9 +165,9 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Active Posture Stools',
       'Solid Wood Desk Tops',
       'Motorized Standing Frames',
-      'Heavy-Duty Monitor Arm Mounts',
       'Ergonomic Vertical Mice',
-      'Custom Mechanical Keyboards',
+      'Smart Portable EV Charging Systems',
+      '4K AI Smart Dash Cams',
     ],
   },
 ]

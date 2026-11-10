@@ -122,8 +122,8 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
     eyebrow: 'Posture & Tactile',
     tagline: 'Engineered seating, standing desks & tactile layouts',
     description:
-      'Executive task seating, solid hardwood motorized desk systems, and heavy-duty monitor arm mounts for peak ergonomic posture and sustained cognitive flow.',
-    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'Monitor Arm Mounts'],
+      'Executive task seating, solid hardwood motorized desk systems, and thoughtfully selected workspace and mobility accessories.',
+    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'EV Charging'],
     image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=85',
     catalogSlugs: [
       'ergonomic-edit',

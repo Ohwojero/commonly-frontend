@@ -468,6 +468,7 @@ export default function DashboardPage() {
   const [addingSubcategoryTo, setAddingSubcategoryTo] = useState<string | null>(null)
   const [newSubcategoryLabel, setNewSubcategoryLabel] = useState('')
   const [editingSubcategory, setEditingSubcategory] = useState<{ slug: string; label: string; categorySlug: string } | null>(null)
+  const [syncingErgonomicSubcategories, setSyncingErgonomicSubcategories] = useState(false)
 
   // — Fetch live media from database
   const reloadMedia = async () => {
@@ -840,6 +841,48 @@ export default function DashboardPage() {
       await reloadData()
     } catch (err: any) {
       alert(`Error removing subcategory: ${err?.message || 'Unknown error'}`)
+    }
+  }
+
+  const syncErgonomicSubcategories = async () => {
+    if (syncingErgonomicSubcategories) return
+    setSyncingErgonomicSubcategories(true)
+    try {
+      const category = (await fetchCategories()).find(item => item.slug === 'ergonomic-edit')
+      if (!category) {
+        alert('Could not find The Ergonomic Edit category in the database.')
+        return
+      }
+
+      const additions = ['Smart Portable EV Charging Systems', '4K AI Smart Dash Cams']
+      const removals = ['Custom Mechanical Keyboards', 'Heavy-Duty Monitor Arm Mounts']
+      const existingSlugs = new Set(category.subcategories.map(subcategory => subcategory.slug))
+      const subcategoriesToRemove = category.subcategories.filter(subcategory =>
+        removals.some(label => slugify(label) === subcategory.slug),
+      )
+
+      if (
+        subcategoriesToRemove.length > 0 &&
+        !confirm('Remove Custom Mechanical Keyboards and Heavy-Duty Monitor Arm Mounts from The Ergonomic Edit? Products assigned to them will remain but lose their subcategory.')
+      ) {
+        return
+      }
+
+      for (const label of additions) {
+        if (!existingSlugs.has(slugify(label))) {
+          await apiAddSubcategory(category.slug, label)
+        }
+      }
+      for (const subcategory of subcategoriesToRemove) {
+        await apiRemoveSubcategory(subcategory.slug)
+      }
+      await reloadData()
+      alert('The Ergonomic Edit subcategories have been updated.')
+    } catch (err: any) {
+      await reloadData()
+      alert(`Error updating The Ergonomic Edit subcategories: ${err?.message || 'Unknown error'}`)
+    } finally {
+      setSyncingErgonomicSubcategories(false)
     }
   }
 
@@ -1311,8 +1354,23 @@ export default function DashboardPage() {
 
               <Card className="border-border/70">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Categories &amp; Navbar Dropdowns ({groups.length})</CardTitle>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Each subcategory appears as a link inside the navbar dropdown for that category.</p>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-base">Categories &amp; Navbar Dropdowns ({groups.length})</CardTitle>
+                      <p className="mt-0.5 text-xs text-muted-foreground">Each subcategory appears as a link inside the navbar dropdown for that category.</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 rounded-full text-xs"
+                      onClick={syncErgonomicSubcategories}
+                      disabled={syncingErgonomicSubcategories}
+                    >
+                      {syncingErgonomicSubcategories ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                      Sync Ergonomic Edit
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {groups.map(group => (

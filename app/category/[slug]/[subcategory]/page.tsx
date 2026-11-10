@@ -50,7 +50,7 @@ export default async function SubcategoryPage({
 
     if (foundSub) {
       item = foundSub.label
-      heroImage = getSubcategoryImage(subSlug, '') || foundSub.image || navGroup?.image || raw.image
+      heroImage = getSubcategoryImage(subSlug, foundSub.image || navGroup?.image || raw.image)
     } else {
       if (navGroup) {
         const subNicheMatch = navGroup.subNiches.find(
@@ -60,7 +60,7 @@ export default async function SubcategoryPage({
         if (subNicheMatch) item = subNicheMatch.label
         else if (navItemMatch) item = navItemMatch
       }
-      heroImage = getSubcategoryImage(subSlug, '') || navGroup?.image || raw?.image || ''
+      heroImage = getSubcategoryImage(subSlug, navGroup?.image || raw?.image || '')
     }
 
     if (navGroup) {

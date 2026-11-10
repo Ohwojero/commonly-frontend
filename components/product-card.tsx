@@ -62,7 +62,7 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
           {(product.subcategory || product.category) && (
             <Badge
               variant="secondary"
-              className="max-w-[65%] truncate border-0 bg-background/95 text-[11px] font-medium tracking-wide shadow-sm backdrop-blur-md"
+              className="h-auto max-w-[95%] whitespace-normal break-words border-0 bg-background/95 py-1 text-left text-[11px] font-medium leading-tight tracking-wide shadow-sm backdrop-blur-md"
             >
               {product.subcategory || product.category}
             </Badge>

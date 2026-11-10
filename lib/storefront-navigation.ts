@@ -29,6 +29,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
     image: 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&q=85',
     catalogSlugs: [
       'personal-edit',
+      'everyday-edit',
       'the-personal-edit',
       'smart-home-security',
       'vehicle-power-precision',
@@ -177,6 +178,10 @@ export const storefrontNavSlug = (value: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
+
+export function getStorefrontRouteSlug(slug: string): string {
+  return slug === 'personal-edit' ? 'everyday-edit' : slug
+}
 
 export function getNavGroupBySlug(slug: string): StorefrontNavGroup | undefined {
   const normalized = slug.toLowerCase().trim()

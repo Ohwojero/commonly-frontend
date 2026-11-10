@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ArrowRight } from 'lucide-react'
 import { SiteChrome } from '@/components/site-header'
 import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory } from '@/lib/categories'
-import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
+import { resolveCatalogSlugs, getNavGroupBySlug, getStorefrontRouteSlug } from '@/lib/storefront-navigation'
 import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +20,8 @@ export default async function CategoryPage({
 }) {
   const resolvedParams = params instanceof Promise ? await params : params
   const slug = decodeURIComponent(resolvedParams?.slug || '').toLowerCase().trim()
+  const routeSlug = getStorefrontRouteSlug(slug)
+  if (routeSlug !== slug) redirect(`/category/${routeSlug}`)
   const navGroup = getNavGroupBySlug(slug)
   const catalogSlugs = resolveCatalogSlugs(slug)
 
@@ -27,6 +30,7 @@ export default async function CategoryPage({
     // Try fetching the category directly, or fall back to the first catalogSlug
     const raw = await fetchCategory(slug).catch(() => fetchCategory(catalogSlugs[0]))
     category = apiCategoryToCategory(raw)
+    category.slug = routeSlug
     if (navGroup) {
       category.label = navGroup.label
       if (navGroup.eyebrow) category.eyebrow = navGroup.eyebrow
@@ -49,6 +53,7 @@ export default async function CategoryPage({
       items: navGroup?.items || [],
     }
   }
+  category.slug = routeSlug
 
   const rawProductsArrays = await Promise.all(
     catalogSlugs.map((cSlug) => fetchProducts({ category: cSlug }).catch(() => []))

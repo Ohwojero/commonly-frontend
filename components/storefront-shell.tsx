@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input'
 import { SiteHeader, SiteFooter } from '@/components/site-header'
 import { ProductCard } from '@/components/product-card'
 import { RegisterGate } from '@/components/register-gate'
-import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
+import { storefrontNavGroups, storefrontNavSlug, getStorefrontRouteSlug } from '@/lib/storefront-navigation'
 import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 // Map ApiProduct to frontend-friendly display shape
@@ -245,7 +245,7 @@ export function StorefrontShell() {
 
                 <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                   <Link
-                    href="/category/personal-edit"
+                    href="/category/everyday-edit"
                     className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
                   >
                     <span>Shop Everyday Tech</span>
@@ -496,7 +496,7 @@ export function StorefrontShell() {
                           {group.subNiches.map((sn) => (
                             <Link
                               key={sn.label}
-                              href={`/category/${group.slug}/${sn.slug}`}
+                              href={`/category/${getStorefrontRouteSlug(group.slug)}/${sn.slug}`}
                               className="text-[11px] font-medium text-foreground/75 hover:text-accent hover:underline"
                             >
                               • {sn.label}
@@ -510,7 +510,7 @@ export function StorefrontShell() {
                   {/* Action Buttons Footer */}
                   <div className="grid grid-cols-2 gap-2 border-t border-border/60 p-4 pt-3 bg-muted/20">
                     <Link
-                      href={`/category/${group.slug}`}
+                      href={`/category/${getStorefrontRouteSlug(group.slug)}`}
                       className="inline-flex h-9 items-center justify-center gap-1 rounded-full border border-border bg-background text-[11px] font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted"
                     >
                       <span>Explore</span>

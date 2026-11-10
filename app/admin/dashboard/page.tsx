@@ -40,7 +40,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { type Product } from '@/lib/products'
 import { type Category, apiCategoryToCategory } from '@/lib/categories'
-import { storefrontNavGroups } from '@/lib/storefront-navigation'
+import { storefrontNavGroups, getStorefrontRouteSlug } from '@/lib/storefront-navigation'
 import { useAuth } from '@/lib/auth-store'
 import { parseListInput, reconstructItems, parseItemDetails } from '@/lib/bullet-helpers'
 import {
@@ -1421,7 +1421,7 @@ export default function DashboardPage() {
                                 ) : (
                                   <>
                                     <span className="flex-1 text-xs font-medium">{subLabel}</span>
-                                    <Link href={`/category/${group.slug}/${subSlug}`} target="_blank" className="text-muted-foreground hover:text-accent"><ExternalLink className="size-3" /></Link>
+                                    <Link href={`/category/${getStorefrontRouteSlug(group.slug)}/${subSlug}`} target="_blank" className="text-muted-foreground hover:text-accent"><ExternalLink className="size-3" /></Link>
                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setEditingSubcategory({ slug: subSlug, label: subLabel, categorySlug: group.slug })}><Settings className="size-3" /></Button>
                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeSubcategory(subSlug)}><Trash2 className="size-3" /></Button>
                                   </>

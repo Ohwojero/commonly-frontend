@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth-store'
 import {
   storefrontNavGroups,
   storefrontNavSlug,
+  getStorefrontRouteSlug,
   type StorefrontNavGroup,
 } from '@/lib/storefront-navigation'
 
@@ -77,7 +78,7 @@ function DropdownGroup({
     return currentPath === norm
   }
 
-  const groupHref = `/category/${group.slug}`
+  const groupHref = `/category/${getStorefrontRouteSlug(group.slug)}`
   const isGroupActive =
     isLinkActive(groupHref) ||
     currentPath.startsWith(normalize(groupHref) + '/') ||
@@ -149,7 +150,7 @@ function DropdownGroup({
         >
           {group.subNiches.map((subNiche) => {
             const isExpanded = !!mobileExpanded[subNiche.label]
-            const subNicheHref = `/category/${group.slug}/${subNiche.slug}`
+            const subNicheHref = `/category/${getStorefrontRouteSlug(group.slug)}/${subNiche.slug}`
             const isSubActive =
               selectedSubNiche === subNiche.label ||
               (selectedSubNiche === null && isLinkActive(subNicheHref))
@@ -181,7 +182,7 @@ function DropdownGroup({
                   }`}
                 >
                   {subNiche.items.map((item) => {
-                    const itemHref = `/category/${group.slug}/${storefrontNavSlug(item)}`
+                    const itemHref = `/category/${getStorefrontRouteSlug(group.slug)}/${storefrontNavSlug(item)}`
                     const isItemActive = isLinkActive(itemHref)
 
                     return (
@@ -374,7 +375,7 @@ export function SiteFooter() {
             {storefrontNavGroups.map((group) => (
               <Link
                 key={group.slug}
-                href={`/category/${group.slug}`}
+                href={`/category/${getStorefrontRouteSlug(group.slug)}`}
                 className="hover:text-primary-foreground"
               >
                 {group.label}
@@ -423,13 +424,13 @@ export function SiteFooter() {
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/80">
             <Link
-              href="/category/personal-edit/smart-home-security"
+              href="/category/everyday-edit/smart-home-security"
               className="hover:text-primary-foreground"
             >
               Smart Home &amp; Security
             </Link>
             <Link
-              href="/category/personal-edit/vehicle-power-precision"
+              href="/category/everyday-edit/vehicle-power-precision"
               className="hover:text-primary-foreground"
             >
               Vehicle, Power &amp; Culinary

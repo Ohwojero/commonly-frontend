@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { SiteChrome } from '@/components/site-header'
 import { CategoryProductGrid } from '@/components/category-product-grid'
 import { fetchCategory, fetchProducts, formatPrice } from '@/lib/api'
 import { apiCategoryToCategory, getSubcategoryImage } from '@/lib/categories'
-import { resolveCatalogSlugs, getNavGroupBySlug } from '@/lib/storefront-navigation'
+import { resolveCatalogSlugs, getNavGroupBySlug, getStorefrontRouteSlug } from '@/lib/storefront-navigation'
 import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +21,8 @@ export default async function SubcategoryPage({
   const resolvedParams = params instanceof Promise ? await params : params
   const catSlug = decodeURIComponent(resolvedParams?.slug || '').toLowerCase().trim()
   const subSlug = decodeURIComponent(resolvedParams?.subcategory || '').toLowerCase().trim()
+  const routeSlug = getStorefrontRouteSlug(catSlug)
+  if (routeSlug !== catSlug) redirect(`/category/${routeSlug}/${subSlug}`)
   const navGroup = getNavGroupBySlug(catSlug)
   const catalogSlugs = resolveCatalogSlugs(catSlug)
 
@@ -37,6 +40,7 @@ export default async function SubcategoryPage({
 
     const raw = fetchedCategories[0] || (await fetchCategory(catalogSlugs[0]))
     category = apiCategoryToCategory(raw)
+    category.slug = routeSlug
 
     // Search all candidate categories for this subcategory
     let foundSub: { label: string; image?: string; slug: string } | undefined
@@ -72,7 +76,7 @@ export default async function SubcategoryPage({
     }
   } catch {
     category = {
-      slug: catSlug,
+      slug: routeSlug,
       label: navGroup?.label || catSlug,
       eyebrow: navGroup?.eyebrow || 'Curated Edit',
       title: navGroup?.tagline || '',
@@ -91,6 +95,7 @@ export default async function SubcategoryPage({
       else if (navItemMatch) item = navItemMatch
     }
   }
+  category.slug = routeSlug
 
   // Fetch products filtered by subcategory across all catalogSlugs
   const rawProductsArrays = await Promise.all(

@@ -32,7 +32,7 @@ export type Product = {
 export const formatNumber = (value: number) => new Intl.NumberFormat('en-US').format(value)
 
 export const products: Product[] = [
-  // ── THE EVERYDAY TECH EDIT (The 6 Curated Essentials) ──
+  // ── THE EVERYDAY TECH EDIT (The 5 Curated Essentials) ──
   {
     id: 'prod-1',
     slug: 'ecobee-smart-thermostat-premium',
@@ -153,10 +153,8 @@ export const products: Product[] = [
     slug: 'ecoflow-delta-2-power-station',
     name: 'EcoFlow DELTA 2 Smart Portable Power Station — 1024Wh LiFePO4 1800W',
     brand: 'EcoFlow',
-    category: 'The Everyday Tech Edit',
-    categorySlug: 'personal-edit',
-    subcategory: 'EcoFlow DELTA 2 (1024Wh LiFePO4)',
-    subcategorySlug: 'ecoflow-delta-2-1024wh-lifepo4',
+    category: 'Uncategorized',
+    categorySlug: 'uncategorized',
     price: '$699.00',
     rating: '4.8',
     reviewCount: 6890,

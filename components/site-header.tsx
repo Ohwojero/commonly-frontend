@@ -44,7 +44,7 @@ function DropdownGroup({
     numSubNiches >= 4
       ? 'md:w-[780px] lg:w-[840px]'
       : numSubNiches === 3
-      ? 'md:w-[620px] lg:w-[680px]'
+      ? 'md:w-[700px] lg:w-[760px]'
       : numSubNiches === 2
       ? 'md:w-[480px] lg:w-[540px]'
       : 'md:w-[320px]'

@@ -22,10 +22,10 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
     label: 'The Everyday Tech Edit',
     slug: 'personal-edit',
     eyebrow: 'Connected Living & Mobility',
-    tagline: 'Smart home, vehicle telematics & precision power systems',
+    tagline: 'Smart home, connected vehicle tech & premium kitchen appliances',
     description:
-      'Curated smart thermostats, 4K wireless security cameras, video doorbells, connected radar telemetry, precision steam ovens, and portable power stations.',
-    summaryPills: ['Smart Thermostats', 'Security Cameras', 'Connected Radar'],
+      'Curated smart home security, connected vehicle tech, premium coffee makers, blenders, and food processors.',
+    summaryPills: ['Smart Thermostats', 'Connected Vehicle Tech', 'Kitchen Appliances'],
     image: 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&q=85',
     catalogSlugs: [
       'personal-edit',
@@ -33,12 +33,16 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'the-personal-edit',
       'smart-home-security',
       'vehicle-power-precision',
+      'kitchen-culinary',
       'smart-thermostats',
       'smart-doorbells',
       'security-cameras',
       'escort-max-360c-mkii-connected-radar',
       'anova-precision-smart-combi-steam-oven',
-      'ecoflow-delta-2-1024wh-lifepo4',
+      'breville-barista-touch-impress',
+      'jura-e8-automatic-coffee-maker',
+      'vitamix-ascent-series',
+      'robot-coupe-food-processors',
     ],
     subNiches: [
       {
@@ -55,8 +59,17 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
         slug: 'vehicle-power-precision',
         items: [
           'Escort MAX 360c MKII Connected Radar',
+        ],
+      },
+      {
+        label: 'Kitchen & Culinary',
+        slug: 'kitchen-culinary',
+        items: [
           'Anova Precision Smart Combi Steam Oven',
-          'EcoFlow DELTA 2 (1024Wh LiFePO4)',
+          'Breville Barista Touch Impress',
+          'Jura E8 Automatic Coffee Maker',
+          'Vitamix Ascent Series',
+          'Robot Coupe Food Processors',
         ],
       },
     ],
@@ -66,7 +79,10 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Security Cameras',
       'Escort MAX 360c MKII Connected Radar',
       'Anova Precision Smart Combi Steam Oven',
-      'EcoFlow DELTA 2 (1024Wh LiFePO4)',
+      'Breville Barista Touch Impress',
+      'Jura E8 Automatic Coffee Maker',
+      'Vitamix Ascent Series',
+      'Robot Coupe Food Processors',
     ],
   },
   {
@@ -157,7 +173,7 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       {
         label: 'Peripheral Layouts',
         slug: 'peripheral-layouts',
-        items: ['Ergonomic Vertical Mice', 'Smart Portable EV Charging Systems', '4K AI Smart Dash Cams'],
+        items: ['Smart Portable EV Charging Systems', '4K AI Smart Dash Cams'],
       },
     ],
     items: [
@@ -166,7 +182,6 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Active Posture Stools',
       'Solid Wood Desk Tops',
       'Motorized Standing Frames',
-      'Ergonomic Vertical Mice',
       'Smart Portable EV Charging Systems',
       '4K AI Smart Dash Cams',
     ],

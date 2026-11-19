@@ -38,6 +38,8 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'smart-doorbells',
       'security-cameras',
       'escort-max-360c-mkii-connected-radar',
+      'smart-portable-ev-charging-systems',
+      '4k-ai-smart-dash-cams',
       'anova-precision-smart-combi-steam-oven',
       'breville-barista-touch-impress',
       'jura-e8-automatic-coffee-maker',
@@ -55,10 +57,12 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
         ],
       },
       {
-        label: 'Vehicle, Power & Culinary',
+        label: 'Vehicle, Power & Mobility',
         slug: 'vehicle-power-precision',
         items: [
           'Escort MAX 360c MKII Connected Radar',
+          'Smart Portable EV Charging Systems',
+          '4K AI Smart Dash Cams',
         ],
       },
       {
@@ -78,6 +82,8 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Smart Doorbells',
       'Security Cameras',
       'Escort MAX 360c MKII Connected Radar',
+      'Smart Portable EV Charging Systems',
+      '4K AI Smart Dash Cams',
       'Anova Precision Smart Combi Steam Oven',
       'Breville Barista Touch Impress',
       'Jura E8 Automatic Coffee Maker',
@@ -140,14 +146,13 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
     tagline: 'Engineered seating, standing desks & tactile layouts',
     description:
       'Executive task seating, solid hardwood motorized desk systems, and thoughtfully selected workspace and mobility accessories.',
-    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'EV Charging'],
+    summaryPills: ['Herman Miller Chairs', 'Standing Desks', 'Motorized Frames'],
     image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=85',
     catalogSlugs: [
       'ergonomic-edit',
       'the-ergonomic-edit',
       'executive-seating',
       'aesthetic-desk-systems',
-      'peripheral-layouts',
       'seating',
       'desks',
       'peripherals',
@@ -170,11 +175,6 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
           'Motorized Standing Frames',
         ],
       },
-      {
-        label: 'Peripheral Layouts',
-        slug: 'peripheral-layouts',
-        items: ['Smart Portable EV Charging Systems', '4K AI Smart Dash Cams'],
-      },
     ],
     items: [
       'Ergonomic Task Chairs (Herman Miller, Steelcase)',
@@ -182,8 +182,6 @@ export const storefrontNavGroups: StorefrontNavGroup[] = [
       'Active Posture Stools',
       'Solid Wood Desk Tops',
       'Motorized Standing Frames',
-      'Smart Portable EV Charging Systems',
-      '4K AI Smart Dash Cams',
     ],
   },
 ]

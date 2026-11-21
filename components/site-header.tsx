@@ -99,10 +99,10 @@ function DropdownGroup({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between gap-1.5 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-[0.15em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-auto md:px-3 md:py-2.5 lg:px-4 whitespace-nowrap ${
+        className={`flex w-full items-center justify-between gap-1.5 rounded-lg px-3.5 py-2.5 text-[13px] font-black uppercase tracking-[0.16em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-auto md:rounded-md md:px-3 md:py-2.5 lg:px-4 md:text-xs md:font-bold whitespace-nowrap ${
           isGroupActive
-            ? 'bg-muted text-foreground font-bold shadow-2xs'
-            : 'text-foreground/90 hover:bg-muted/70 hover:text-accent'
+            ? 'bg-muted text-foreground font-black shadow-xs'
+            : 'text-foreground bg-muted/30 md:bg-transparent hover:bg-muted/70 hover:text-accent'
         }`}
       >
         <span className="flex items-center gap-1.5">
@@ -112,7 +112,7 @@ function DropdownGroup({
           )}
         </span>
         <ChevronDown
-          className={`size-3 transition-transform md:size-3.5 ${open ? 'rotate-180' : ''}`}
+          className={`size-3.5 transition-transform md:size-3.5 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -161,15 +161,15 @@ function DropdownGroup({
                   <button
                     type="button"
                     onClick={() => handleSubNicheClick(subNiche.label)}
-                    className={`inline-flex w-full items-center justify-between gap-1.5 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-all cursor-pointer ${
+                    className={`inline-flex w-full items-center justify-between gap-1.5 rounded-md pl-3 pr-2 py-1.5 text-xs font-normal normal-case tracking-normal transition-all cursor-pointer ${
                       isSubActive
-                        ? 'bg-primary text-primary-foreground shadow-xs'
-                        : 'text-foreground hover:bg-muted/70 hover:text-accent'
+                        ? 'bg-accent/15 text-accent font-medium shadow-2xs'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                     }`}
                   >
                     <span>{subNiche.label}</span>
                     <ChevronDown
-                      className={`size-3.5 transition-transform md:hidden ${
+                      className={`size-3 transition-transform md:hidden text-muted-foreground ${
                         isExpanded ? 'rotate-180' : ''
                       }`}
                     />

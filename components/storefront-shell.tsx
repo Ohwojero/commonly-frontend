@@ -49,19 +49,13 @@ export function StorefrontShell({
   const [emailInput, setEmailInput] = useState('')
   const [emailSubscribed, setEmailSubscribed] = useState(false)
   const [allProducts, setAllProducts] = useState<ReturnType<typeof toDisplayProduct>[]>(() => {
-    const fallbackMapped = (fallbackProducts as any[]).filter((p) => isNotDummyProduct(p.slug)).map((p) => ({
+    if (initialProducts && initialProducts.length > 0) return initialProducts
+    return (fallbackProducts as any[]).map((p) => ({
       ...p,
       categorySlug: p.categorySlug || 'personal-edit',
       prime: !!p.affiliateUrl,
       isSpotlight: !!p.isSpotlight,
     }))
-    if (initialProducts && initialProducts.length > 0) {
-      const map = new Map<string, any>()
-      for (const p of fallbackMapped) map.set(p.slug, p)
-      for (const p of initialProducts) if (isNotDummyProduct(p.slug)) map.set(p.slug, p)
-      return Array.from(map.values())
-    }
-    return fallbackMapped
   })
 
   useEffect(() => {
@@ -69,14 +63,9 @@ export function StorefrontShell({
       .catch(() => [])
       .then((productsData) => {
         if (productsData && productsData.length > 0) {
-          const valid = productsData.filter((p) => isNotDummyProduct(p.slug)).map(toDisplayProduct)
+          const valid = productsData.filter((p) => isNotDummyProduct(p.slug))
           if (valid.length > 0) {
-            setAllProducts((current) => {
-              const map = new Map<string, any>()
-              for (const p of current) map.set(p.slug, p)
-              for (const p of valid) map.set(p.slug, p)
-              return Array.from(map.values())
-            })
+            setAllProducts(valid.map(toDisplayProduct))
           }
         }
       })
@@ -225,10 +214,10 @@ export function StorefrontShell({
                   setActiveGroupSlug(null)
                   setActiveTabKey('')
                 }}
-                className={`rounded-full px-5 py-2.5 text-xs sm:text-[13px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+                className={`rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-[13px] font-black uppercase tracking-wider transition-all shadow-xs ${
                   !activeGroupSlug && !activeTabKey
                     ? 'bg-foreground text-background shadow-md'
-                    : 'border-2 border-border/80 bg-background text-foreground/75 hover:border-foreground hover:text-foreground'
+                    : 'border-2 border-border/80 bg-background text-foreground hover:border-foreground'
                 }`}
               >
                 All Products ({allProducts.length})
@@ -243,10 +232,10 @@ export function StorefrontShell({
                       setActiveTabKey('')
                       setActiveGroupSlug((current) => (current === group.slug ? null : group.slug))
                     }}
-                    className={`rounded-full px-5 py-2.5 text-xs sm:text-[13px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+                    className={`rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-[13px] font-black uppercase tracking-wider transition-all shadow-xs ${
                       isSelected
                         ? 'bg-foreground text-background shadow-md'
-                        : 'border-2 border-border/80 bg-background text-foreground/75 hover:border-foreground hover:text-foreground'
+                        : 'border-2 border-border/80 bg-background text-foreground hover:border-foreground'
                     }`}
                   >
                     {group.label}

@@ -175,6 +175,7 @@ export default async function SubcategoryPage({
             products={subcategoryProducts.length ? subcategoryProducts as any : [] as any}
             title={`Shop ${item}`}
           />
+
           {!subcategoryProducts.length && (
             <p className="mt-8 text-center text-muted-foreground">New picks for this category are coming soon.</p>
           )}

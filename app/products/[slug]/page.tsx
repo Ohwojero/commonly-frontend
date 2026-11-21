@@ -1,10 +1,73 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { fetchProduct, fetchProducts, formatPrice } from '@/lib/api'
 import { getProduct, products } from '@/lib/products'
 import { ProductGallery } from '@/components/product-gallery'
 import { SiteChrome } from '@/components/site-header'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const decodedSlug = decodeURIComponent(slug || '').trim()
+
+  let product: any = null
+  try {
+    const raw = await fetchProduct(decodedSlug)
+    if (raw && (raw.id || raw.name)) {
+      product = raw
+    }
+  } catch {}
+
+  if (!product) {
+    product =
+      getProduct(decodedSlug) ||
+      products.find((p) => p.slug.toLowerCase() === decodedSlug.toLowerCase())
+  }
+
+  if (!product) {
+    return {
+      title: 'Product Not Found | Commonlys',
+    }
+  }
+
+  const title = `${product.name} | Commonlys`
+  const description =
+    product.description ||
+    `Curated high-performance gear: ${product.name} with specifications and direct Amazon fulfillment.`
+  const url = `https://www.commonlys.com/products/${product.slug}`
+  const image = product.image || '/luxury-placeholder.svg'
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'Commonlys',
+      images: [
+        {
+          url: image,
+          width: 800,
+          height: 800,
+          alt: product.name,
+        },
+      ],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  }
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

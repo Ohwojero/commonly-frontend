@@ -775,7 +775,7 @@ export default function DashboardPage() {
   const bulkRemoveMedia = async () => {
     if (selectedMediaIds.length === 0) return
     const itemsToDelete = mediaList.filter(m => selectedMediaIds.includes(m.id))
-    if (!confirm(`Are you sure you want to remove images for ${itemsToDelete.length} selected item(s)?`)) return
+    if (!confirm(`Delete the ${itemsToDelete.length} selected item(s)? This action cannot be undone.`)) return
 
     setBulkDeletingMedia(true)
     try {
@@ -1332,6 +1332,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
             </div>
           )}
 
@@ -1481,6 +1482,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
             </div>
           )}
 
@@ -1742,12 +1744,12 @@ export default function DashboardPage() {
                           type="button"
                           variant="destructive"
                           size="sm"
-                          className="h-8 rounded-full text-xs gap-1.5"
+                          className="h-8 rounded-full text-xs gap-1.5 font-medium px-4 shadow-sm"
                           onClick={bulkRemoveMedia}
                           disabled={bulkDeletingMedia}
                         >
                           {bulkDeletingMedia ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
-                          {bulkDeletingMedia ? 'Removing...' : `Delete Selected (${selectedMediaIds.length})`}
+                          {bulkDeletingMedia ? 'Deleting Items…' : `Delete Items Selected (${selectedMediaIds.length})`}
                         </Button>
                       </div>
                     </div>
@@ -1864,6 +1866,37 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Floating Action Bar for Media Library */}
+              {selectedMediaIds.length > 0 && (
+                <aside aria-label="Bulk actions" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full border border-border/80 bg-background/95 backdrop-blur-md px-4 py-2.5 shadow-2xl">
+                  <span className="text-xs font-semibold text-foreground whitespace-nowrap">
+                    {selectedMediaIds.length} item{selectedMediaIds.length > 1 ? 's' : ''} selected
+                  </span>
+                  <div className="h-4 w-px bg-border" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 rounded-full text-xs px-2.5 text-muted-foreground hover:text-foreground"
+                    onClick={() => setSelectedMediaIds([])}
+                    disabled={bulkDeletingMedia}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="h-7 rounded-full text-xs gap-1.5 font-medium px-3.5 shadow-sm"
+                    onClick={bulkRemoveMedia}
+                    disabled={bulkDeletingMedia}
+                  >
+                    {bulkDeletingMedia ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+                    {bulkDeletingMedia ? 'Deleting Items…' : `Delete Items Selected (${selectedMediaIds.length})`}
+                  </Button>
+                </aside>
+              )}
             </div>
           )}
 
@@ -2017,6 +2050,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
             </div>
           )}
 
@@ -2081,6 +2115,7 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+
             </div>
           )}
         </section>

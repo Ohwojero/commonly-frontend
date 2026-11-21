@@ -5,17 +5,11 @@ import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Monitor,
   Search,
-  ShieldCheck,
   Sparkles,
-  Truck,
   X,
-  Zap,
 } from 'lucide-react'
-import { fetchProducts, formatPrice, trackAffiliateClick, type ApiProduct } from '@/lib/api'
+import { fetchProducts, formatPrice, type ApiProduct } from '@/lib/api'
 import { useAuth } from '@/lib/auth-store'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -24,7 +18,7 @@ import { Input } from '@/components/ui/input'
 import { SiteHeader, SiteFooter } from '@/components/site-header'
 import { ProductCard } from '@/components/product-card'
 import { RegisterGate } from '@/components/register-gate'
-import { storefrontNavGroups, storefrontNavSlug, getStorefrontRouteSlug } from '@/lib/storefront-navigation'
+import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
 import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
 
 // Map ApiProduct to frontend-friendly display shape
@@ -42,21 +36,11 @@ function toDisplayProduct(p: ApiProduct) {
   }
 }
 
-function ProductCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-2xl border border-border/40 bg-card overflow-hidden">
-      <div className="aspect-[4/5] bg-muted" />
-      <div className="p-5 space-y-3">
-        <div className="h-3 w-20 bg-muted rounded" />
-        <div className="h-5 w-full bg-muted rounded" />
-        <div className="h-3 w-16 bg-muted rounded" />
-        <div className="h-10 w-full bg-muted rounded-full mt-4" />
-      </div>
-    </div>
-  )
-}
-
-export function StorefrontShell() {
+export function StorefrontShell({
+  initialProducts,
+}: {
+  initialProducts?: ReturnType<typeof toDisplayProduct>[]
+} = {}) {
   const { user } = useAuth()
   const [searchOpen, setSearchOpen] = useState(false)
   const [preview, setPreview] = useState<ReturnType<typeof toDisplayProduct> | null>(null)
@@ -64,28 +48,38 @@ export function StorefrontShell() {
   const [activeGroupSlug, setActiveGroupSlug] = useState<string | null>(null)
   const [emailInput, setEmailInput] = useState('')
   const [emailSubscribed, setEmailSubscribed] = useState(false)
-  const [allProducts, setAllProducts] = useState<ReturnType<typeof toDisplayProduct>[]>([])
-  const [loading, setLoading] = useState(true)
-  const [heroProductIndex, setHeroProductIndex] = useState(0)
-  const [heroSlideDirection, setHeroSlideDirection] = useState<'next' | 'previous'>('next')
-  const [heroPaused, setHeroPaused] = useState(false)
+  const [allProducts, setAllProducts] = useState<ReturnType<typeof toDisplayProduct>[]>(() => {
+    const fallbackMapped = (fallbackProducts as any[]).filter((p) => isNotDummyProduct(p.slug)).map((p) => ({
+      ...p,
+      categorySlug: p.categorySlug || 'personal-edit',
+      prime: !!p.affiliateUrl,
+      isSpotlight: !!p.isSpotlight,
+    }))
+    if (initialProducts && initialProducts.length > 0) {
+      const map = new Map<string, any>()
+      for (const p of fallbackMapped) map.set(p.slug, p)
+      for (const p of initialProducts) if (isNotDummyProduct(p.slug)) map.set(p.slug, p)
+      return Array.from(map.values())
+    }
+    return fallbackMapped
+  })
 
   useEffect(() => {
     fetchProducts({ sort: 'views' })
       .catch(() => [])
       .then((productsData) => {
         if (productsData && productsData.length > 0) {
-          const valid = productsData.filter((p) => isNotDummyProduct(p.slug))
+          const valid = productsData.filter((p) => isNotDummyProduct(p.slug)).map(toDisplayProduct)
           if (valid.length > 0) {
-            setAllProducts(valid.map(toDisplayProduct))
-          } else {
-            setAllProducts(fallbackProducts as any)
+            setAllProducts((current) => {
+              const map = new Map<string, any>()
+              for (const p of current) map.set(p.slug, p)
+              for (const p of valid) map.set(p.slug, p)
+              return Array.from(map.values())
+            })
           }
-        } else {
-          setAllProducts(fallbackProducts as any)
         }
       })
-      .finally(() => setLoading(false))
   }, [])
 
   const dynamicFilterTabs = storefrontNavGroups.flatMap((group) => [
@@ -106,16 +100,45 @@ export function StorefrontShell() {
   const filteredProducts = allProducts.filter((p) => {
     const activeGroup = storefrontNavGroups.find((group) => group.slug === activeGroupSlug)
     if (activeGroup) {
-      return (
-        activeGroup.catalogSlugs.includes(p.categorySlug) ||
+      const matchCategory =
+        activeGroup.catalogSlugs.includes(p.categorySlug || '') ||
         activeGroup.catalogSlugs.includes(p.subcategorySlug || '') ||
         activeGroup.subNiches.some(
           (sn) =>
             sn.slug === p.subcategorySlug ||
+            sn.slug === p.categorySlug ||
             sn.items.some((item) => storefrontNavSlug(item) === p.subcategorySlug)
         )
-      )
+      if (!matchCategory) return false
+
+      if (activeTabKey) {
+        const matchingSubNiche = activeGroup.subNiches.find((sn) => sn.slug === activeTabKey)
+        if (matchingSubNiche) {
+          const directMatch =
+            p.subcategorySlug === matchingSubNiche.slug ||
+            p.categorySlug === matchingSubNiche.slug ||
+            (p.subcategory && p.subcategory.toLowerCase() === matchingSubNiche.label.toLowerCase())
+
+          const itemMatch = matchingSubNiche.items.some((item) => {
+            const itemSlug = storefrontNavSlug(item)
+            return (
+              itemSlug === p.subcategorySlug ||
+              itemSlug === p.categorySlug ||
+              (p.subcategory && p.subcategory.toLowerCase() === item.toLowerCase())
+            )
+          })
+
+          return directMatch || itemMatch
+        }
+
+        return (
+          p.subcategorySlug === activeTabKey ||
+          p.categorySlug === activeTabKey
+        )
+      }
+      return true
     }
+
     const activeTab = dynamicFilterTabs.find((tab) => tab.key === activeTabKey)
     if (!activeTab) return true
     if (activeTab.key.startsWith('group:')) {
@@ -128,65 +151,42 @@ export function StorefrontShell() {
     )
   })
 
-  const categoryCards = storefrontNavGroups.map((group) => {
-    const products = allProducts.filter(
-      (product) =>
-        group.catalogSlugs.includes(product.categorySlug) ||
-        group.catalogSlugs.includes(product.subcategorySlug || '')
-    )
-    return { group, products, featuredProduct: products[0] }
-  })
-
-  // Spotlight: prefer isSpotlight product, then first product
-  const spotlight = allProducts.find((p) => p.isSpotlight) ?? allProducts[0]
-  const heroProducts = spotlight
-    ? [spotlight, ...allProducts.filter((product) => product.slug !== spotlight.slug)]
-    : []
-  const heroProduct = heroProducts[heroProductIndex % Math.max(heroProducts.length, 1)]
-
-  useEffect(() => {
-    setHeroProductIndex(0)
-  }, [spotlight?.slug])
-
-  useEffect(() => {
-    if (heroPaused || heroProducts.length < 2) return
-    const interval = window.setInterval(() => {
-      setHeroSlideDirection('next')
-      setHeroProductIndex((index) => (index + 1) % heroProducts.length)
-    }, 5000)
-    return () => window.clearInterval(interval)
-  }, [heroPaused, heroProducts.length])
-
-  const changeHeroProduct = (direction: 'next' | 'previous') => {
-    setHeroSlideDirection(direction)
-    setHeroProductIndex((index) =>
-      (index + (direction === 'next' ? 1 : heroProducts.length - 1)) % heroProducts.length
-    )
-  }
-
-  // Dynamic unique brands from loaded products
-  const uniqueBrands = Array.from(new Set(allProducts.map((p) => p.brand))).filter(Boolean)
-
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
-    if (emailInput.trim()) {
-      setEmailSubscribed(true)
-      setEmailInput('')
-    }
+    if (!emailInput) return
+    setEmailSubscribed(true)
+    setEmailInput('')
   }
 
+  const activeGroupName = storefrontNavGroups.find((g) => g.slug === activeGroupSlug)?.label
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background font-sans text-foreground">
       <SiteHeader />
 
+      {/* Search Drawer */}
       {searchOpen && (
-        <div className="border-b bg-card px-5 py-4">
-          <div className="mx-auto flex max-w-7xl items-center gap-3">
-            <Search className="size-4 text-muted-foreground" />
+        <div className="fixed inset-x-0 top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border p-4 shadow-lg animate-in slide-in-from-top-4">
+          <div className="mx-auto flex max-w-3xl items-center gap-3">
+            <Search className="size-5 text-muted-foreground shrink-0" />
             <Input
               autoFocus
-              placeholder="Search dash cams, EV chargers, ergonomic chairs, standing desks, vertical monitors..."
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+              placeholder="Search verified products, brands, or tech categories…"
+              className="h-10 flex-1 border-0 bg-transparent text-sm focus-visible:ring-0"
+              onChange={(e) => {
+                const q = e.target.value.toLowerCase()
+                if (!q) {
+                  setActiveGroupSlug(null)
+                  setActiveTabKey('')
+                  return
+                }
+                const matchGroup = storefrontNavGroups.find((g) =>
+                  g.label.toLowerCase().includes(q) || g.items.some((it) => it.toLowerCase().includes(q))
+                )
+                if (matchGroup) {
+                  setActiveGroupSlug(matchGroup.slug)
+                }
+              }}
             />
             <Button
               variant="ghost"
@@ -194,448 +194,143 @@ export function StorefrontShell() {
               onClick={() => setSearchOpen(false)}
               aria-label="Close search"
             >
-              <X />
+              <X className="size-5" />
             </Button>
           </div>
         </div>
       )}
 
-      <main className="pt-28">
-        {/* Hero Section */}
-        <section className="relative mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:px-8 lg:pb-16">
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-muted shadow-2xl">
-            <video
-              className="absolute inset-0 size-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="https://images.unsplash.com/photo-1593062096033-9a26b09da705?auto=format&fit=crop&w=1400&q=85"
-              aria-label="Elite developer workspace with ambient lighting and ultra-wide monitor"
-            >
-              <source
-                src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_25fps.mp4"
-                type="video/mp4"
-              />
-              <source
-                src="https://videos.pexels.com/video-files/4812195/4812195-hd_1920_1080_25fps.mp4"
-                type="video/mp4"
-              />
-              Your browser does not support the video tag.
-            </video>
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-black/55 sm:bg-gradient-to-r sm:from-black/90 sm:via-black/65 sm:to-black/35" />
-
-            <div className="relative z-10 grid min-h-[480px] items-center gap-8 px-5 py-10 sm:min-h-[580px] sm:px-12 sm:py-16 lg:min-h-[640px] lg:grid-cols-[1.1fr_.9fr] lg:gap-12 lg:px-16 lg:py-20">
-              <div className="flex flex-col justify-center">
-                <div className="inline-flex w-fit items-center gap-1.5 sm:gap-2 rounded-full border border-amber-300/40 bg-amber-400/15 px-3.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
-                  <Sparkles className="size-3 text-amber-300 sm:size-3.5 shrink-0" />
-                  <span>Workspace &amp; Everyday Tech Gear</span>
-                </div>
-
-                <h1 className="mt-4 sm:mt-6 max-w-3xl font-sans text-3xl sm:text-5xl lg:text-7xl leading-[1.08] sm:leading-[1.02] tracking-tight text-white uppercase font-bold">
-                  CURATED HIGH-PERFORMANCE WORKSPACE &amp; EVERYDAY TECH GEAR.
-                </h1>
-
-                <p className="mt-3.5 sm:mt-6 max-w-xl text-xs sm:text-base lg:text-lg leading-relaxed sm:leading-8 text-white/90 font-normal">
-                  Straightforward, honest curation on Amazon across high-performance workspace hardware, studio compute, and intelligent personal tech gear.
-                  We test the specs, cut through the marketing noise, and link directly to verified Amazon Prime products with 30-day returns.
-                </p>
-
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                  <Link
-                    href="/category/everyday-edit"
-                    className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-xs font-bold uppercase tracking-widest text-black shadow-lg transition-all hover:bg-white/90 hover:shadow-xl active:scale-[0.98]"
-                  >
-                    <span>Shop Everyday Tech</span>
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                  <Link
-                    href="#categories"
-                    className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full border border-white/35 bg-white/10 px-7 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-[0.98] text-center"
-                  >
-                    <span>Shop Workspace Hardware</span>
-                  </Link>
-                </div>
+      <main className="flex-1 pt-24 sm:pt-28 pb-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header Controls: Title & Category Pills */}
+          <div className="flex flex-col gap-4 py-6 border-b border-border/60 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-accent mb-2">
+                <Sparkles className="size-3" />
+                <span>Verified Direct Fulfillment on Amazon</span>
               </div>
+              <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+                {activeGroupName || 'Curated Products'}
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                Showing {filteredProducts.length} verified tech &amp; workspace picks
+              </p>
+            </div>
 
-              {heroProduct && (
-                <div
-                  id="featured-product"
-                  className="w-full max-w-md justify-self-center overflow-hidden rounded-xl border border-white/25 bg-black/25 p-3 shadow-2xl backdrop-blur-sm lg:justify-self-end"
-                  onMouseEnter={() => setHeroPaused(true)}
-                  onMouseLeave={() => setHeroPaused(false)}
-                >
-                  <Link
-                    key={heroProduct.slug}
-                    href={`/products/${heroProduct.slug}`}
-                    className={`group block motion-reduce:animate-none animate-in fade-in duration-500 ${
-                      heroSlideDirection === 'next'
-                        ? 'slide-in-from-right-8'
-                        : 'slide-in-from-left-8'
+            {/* Main Category Filter Pills */}
+            <div className="flex flex-wrap gap-2.5 items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveGroupSlug(null)
+                  setActiveTabKey('')
+                }}
+                className={`rounded-full px-5 py-2.5 text-xs sm:text-[13px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+                  !activeGroupSlug && !activeTabKey
+                    ? 'bg-foreground text-background shadow-md'
+                    : 'border-2 border-border/80 bg-background text-foreground/75 hover:border-foreground hover:text-foreground'
+                }`}
+              >
+                All Products ({allProducts.length})
+              </button>
+              {storefrontNavGroups.map((group) => {
+                const isSelected = activeGroupSlug === group.slug
+                return (
+                  <button
+                    key={group.slug}
+                    type="button"
+                    onClick={() => {
+                      setActiveTabKey('')
+                      setActiveGroupSlug((current) => (current === group.slug ? null : group.slug))
+                    }}
+                    className={`rounded-full px-5 py-2.5 text-xs sm:text-[13px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+                      isSelected
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'border-2 border-border/80 bg-background text-foreground/75 hover:border-foreground hover:text-foreground'
                     }`}
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-white/95">
-                      <img
-                        src={heroProduct.image}
-                        alt={heroProduct.name}
-                        className="size-full object-contain p-5 transition-transform duration-500 group-hover:scale-[1.03]"
-                        onError={(event) => {
-                          ;(event.target as HTMLImageElement).src = '/luxury-placeholder.svg'
-                        }}
-                      />
-                      <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-                        Editor&apos;s #1 Top Pick
-                      </span>
-                    </div>
-                    <div className="flex items-end justify-between gap-4 px-1 pb-1 pt-4 text-white">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">
-                          {heroProduct.brand} · In Stock on Amazon
-                        </p>
-                        <h2 className="mt-1 line-clamp-2 font-sans text-xl font-bold leading-tight sm:text-2xl">
-                          {heroProduct.name}
-                        </h2>
-                      </div>
-                      <ArrowRight className="mb-1 size-5 shrink-0 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </Link>
-                  <div className="mt-3 flex items-center justify-between gap-3">
+                    {group.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Sub-niche pills when a category is selected */}
+          {activeGroupSlug && (
+            <div className="flex flex-wrap items-center gap-2 pt-3.5 pb-2.5 border-b border-border/40">
+              <button
+                type="button"
+                onClick={() => setActiveTabKey('')}
+                className={`rounded-full px-3.5 py-1 text-xs font-normal transition-all ${
+                  !activeTabKey
+                    ? 'bg-accent/15 text-accent font-medium border border-accent/30 shadow-xs'
+                    : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent'
+                }`}
+              >
+                All {activeGroupName}
+              </button>
+              {storefrontNavGroups
+                .find((g) => g.slug === activeGroupSlug)
+                ?.subNiches.map((sn) => {
+                  const isSubSelected = activeTabKey === sn.slug
+                  return (
                     <button
+                      key={sn.slug}
                       type="button"
-                      onClick={() => changeHeroProduct('previous')}
-                      aria-label="Previous featured product"
-                      className="grid size-9 shrink-0 place-items-center rounded-full border border-white/35 text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    <div
-                      className="flex min-w-0 flex-1 items-center justify-center gap-1.5"
-                      aria-label={`Product ${heroProductIndex + 1} of ${heroProducts.length}`}
-                    >
-                      {heroProducts.map((product, index) => (
-                        <button
-                          key={product.slug}
-                          type="button"
-                          onClick={() => {
-                            setHeroSlideDirection(index > heroProductIndex ? 'next' : 'previous')
-                            setHeroProductIndex(index)
-                          }}
-                          aria-label={`Show ${product.name}`}
-                          aria-current={index === heroProductIndex ? 'true' : undefined}
-                          className={`h-1.5 rounded-full transition-all ${
-                            index === heroProductIndex
-                              ? 'w-6 bg-white'
-                              : 'w-1.5 bg-white/50 hover:bg-white/80'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => changeHeroProduct('next')}
-                      aria-label="Next featured product"
-                      className="grid size-9 shrink-0 place-items-center rounded-full border border-white/35 text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                  <RegisterGate
-                    productSlug={heroProduct.slug}
-                    affiliateUrl={
-                      heroProduct.affiliateUrl ||
-                      `https://www.amazon.com/s?k=${encodeURIComponent(
-                        `${heroProduct.brand || ''} ${heroProduct.name || ''}`.trim()
-                      )}`
-                    }
-                    buttonLabel="Buy on Amazon"
-                    buttonClassName="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-white/85 shadow-sm"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* 4 Value Pillars Strip */}
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 py-6 lg:px-8">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
-                <Sparkles className="size-5" />
-              </div>
-              <h3 className="mt-3 font-sans text-base font-bold">Smart Personal &amp; Mobility Tech</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
-                High-performance 4K vision AI dash cams, portable EV chargers, and precision smart hardware.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
-                <Zap className="size-5" />
-              </div>
-              <h3 className="mt-3 font-sans text-base font-bold">Studio Compute &amp; Audio</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
-                High-throughput Thunderbolt hubs, spatial audio monitoring, and ultra-wide coding displays.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
-                <CheckCircle2 className="size-5" />
-              </div>
-              <h3 className="mt-3 font-sans text-base font-bold">Ergonomic Architecture</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
-                Engineered kneeling stools, high-back mesh task seating, motorized standing desks, and posture gear.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all hover:border-accent/40">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/5 text-accent">
-                <Truck className="size-5" />
-              </div>
-              <h3 className="mt-3 font-sans text-base font-bold">Amazon Prime Assurance</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground font-medium">
-                Verified brand storefront collation with live transparent pricing and trusted Prime buyer protection.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Categories Section: 3 Grid Blocks */}
-        <section id="categories" className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                Our Curated Collections
-              </p>
-              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Shop by Tech Category</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground font-medium">
-                Browse our focused edits across personal tech, studio compute &amp; displays, and ergonomic workspace hardware.
-              </p>
-            </div>
-            <p className="shrink-0 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {loading ? 'Loading collections' : `${allProducts.length} curated picks`}
-            </p>
-          </div>
-
-          {/* 3-Column Beautiful Grid Layout */}
-          <div className="grid gap-6 md:grid-cols-3">
-            {categoryCards.map(({ group, products, featuredProduct }, index) => {
-              const selected = activeGroupSlug === group.slug
-              return (
-                <article
-                  key={group.slug}
-                  className={`group flex flex-col justify-between overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:shadow-xl ${
-                    selected
-                      ? 'border-accent ring-2 ring-accent/30'
-                      : 'border-border/80 hover:border-accent/50'
-                  }`}
-                >
-                  <div>
-                    {/* Image Banner */}
-                    <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                      <img
-                        src={group.image || featuredProduct?.image || '/luxury-placeholder.svg'}
-                        alt={group.label}
-                        className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        onError={(event) => {
-                          ;(event.target as HTMLImageElement).src = '/luxury-placeholder.svg'
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                      {/* Number badge */}
-                      <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                        0{index + 1} · Edit
-                      </span>
-
-                      {/* Pick count */}
-                      <span className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                        {loading
-                          ? 'Loading'
-                          : products.length
-                            ? `${products.length} picks`
-                            : 'Curated collection'}
-                      </span>
-
-                      {/* Title on image overlay bottom */}
-                      <div className="absolute bottom-3 left-4 right-4">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">
-                          {group.eyebrow}
-                        </p>
-                        <h3 className="font-sans text-2xl font-medium tracking-tight text-white">
-                          {group.label}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="flex flex-col p-5">
-                      {/* Summary Sub-niche Pills */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {group.summaryPills?.map((pill) => (
-                          <span
-                            key={pill}
-                            className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-foreground/80 border border-border/40"
-                          >
-                            {pill}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Description */}
-                      <p className="mt-3.5 text-xs leading-relaxed text-muted-foreground">
-                        {group.description}
-                      </p>
-
-                      {/* Sub-niches Links */}
-                      <div className="mt-4 border-t border-border/50 pt-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
-                          Included Niches:
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                          {group.subNiches.map((sn) => (
-                            <Link
-                              key={sn.label}
-                              href={`/category/${getStorefrontRouteSlug(group.slug)}/${sn.slug}`}
-                              className="text-[11px] font-medium text-foreground/75 hover:text-accent hover:underline"
-                            >
-                              • {sn.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons Footer */}
-                  <div className="grid grid-cols-2 gap-2 border-t border-border/60 p-4 pt-3 bg-muted/20">
-                    <Link
-                      href={`/category/${getStorefrontRouteSlug(group.slug)}`}
-                      className="inline-flex h-9 items-center justify-center gap-1 rounded-full border border-border bg-background text-[11px] font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-muted"
-                    >
-                      <span>Explore</span>
-                      <ArrowRight className="size-3" />
-                    </Link>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={selected ? 'default' : 'secondary'}
-                      className="h-9 rounded-full text-[11px] uppercase tracking-wider"
                       onClick={() => {
-                        setActiveTabKey('')
-                        setActiveGroupSlug((current) =>
-                          current === group.slug ? null : group.slug
-                        )
-                        document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })
+                        setActiveTabKey((cur) => (cur === sn.slug ? '' : sn.slug))
                       }}
+                      className={`rounded-full px-3.5 py-1 text-xs font-normal transition-all ${
+                        isSubSelected
+                          ? 'bg-accent/15 text-accent font-medium border border-accent/30 shadow-xs'
+                          : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent'
+                      }`}
                     >
-                      {selected ? 'Active Filter' : 'Filter Below'}
-                    </Button>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-
-          {/* Dynamic Brand Marquee Ticker */}
-          {uniqueBrands.length > 0 && (
-            <div className="relative mt-12 overflow-hidden rounded-2xl border border-border/40 bg-secondary/40 py-3.5">
-              <div className="marquee flex gap-8 whitespace-nowrap text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                {[...uniqueBrands, ...uniqueBrands, ...uniqueBrands].map((brand, idx) => (
-                  <span key={idx} className="flex items-center gap-8">
-                    <span>★ {brand}</span>
-                    <span>·</span>
-                  </span>
-                ))}
-              </div>
+                      {sn.label}
+                    </button>
+                  )
+                })}
             </div>
           )}
-        </section>
 
-        {/* Curated Products Section */}
-        <section id="shop" className="mx-auto max-w-7xl px-5 py-16 lg:px-8 border-t border-border/60">
-          <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                Curated Selection
-              </p>
-              <h2 className="mt-2 font-sans text-3xl sm:text-5xl font-bold">Top-Rated Tech Picks</h2>
-              <p className="mt-2 text-sm text-muted-foreground font-medium">
-                Verified smart automotive gear, portable EV chargers, studio compute, and ergonomic seating on Amazon. Tested for quality and reliability.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {activeGroupSlug && (
+          {/* Products Grid directly */}
+          <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredProducts.length === 0 ? (
+              <div className="col-span-full py-20 text-center">
+                <p className="text-base font-sans text-muted-foreground">
+                  No curated products in this view yet.
+                </p>
                 <button
-                  type="button"
-                  onClick={() => setActiveGroupSlug(null)}
-                  className="rounded-full bg-accent/15 border border-accent/40 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:bg-accent/25 transition-all"
-                >
-                  Clear Edit Filter ✕
-                </button>
-              )}
-              {dynamicFilterTabs.map((tab) => (
-                <button
-                  key={tab.key}
                   type="button"
                   onClick={() => {
                     setActiveGroupSlug(null)
-                    setActiveTabKey((current) => (current === tab.key ? '' : tab.key))
+                    setActiveTabKey('')
                   }}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
-                    activeTabKey === tab.key
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'border border-border/80 bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground'
-                  }`}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
                 >
-                  {tab.label}
+                  View All Products
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : (
+              filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.slug}
+                  product={product as any}
+                  onPreview={setPreview as any}
+                />
+              ))
+            )}
           </div>
+        </div>
 
-          <p className="mb-8 text-xs uppercase tracking-widest font-semibold text-muted-foreground">
-            {loading
-              ? 'Loading picks...'
-              : activeGroupSlug
-                ? `Showing ${filteredProducts.length} verified picks in ${
-                    storefrontNavGroups.find((g) => g.slug === activeGroupSlug)?.label
-                  }`
-                : activeTabKey
-                  ? `Showing ${filteredProducts.length} verified picks in ${
-                      dynamicFilterTabs.find((tab) => tab.key === activeTabKey)?.label
-                    }`
-                  : `Showing ${filteredProducts.length} verified picks across all edits`}
-          </p>
-
-          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-              : filteredProducts.length === 0 ? (
-                  <div className="col-span-full py-16 text-center">
-                    <p className="text-base font-sans text-muted-foreground">
-                      No curated products in this view yet.
-                    </p>
-                  </div>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <ProductCard
-                      key={product.slug}
-                      product={product as any}
-                      onPreview={setPreview as any}
-                    />
-                  ))
-                )}
-          </div>
-        </section>
-
-        {/* Newsletter */}
-        <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
+        {/* Newsletter Section */}
+        <section className="mx-auto max-w-7xl px-5 pt-20 lg:px-8">
           <div className="rounded-3xl border border-border/80 bg-card p-8 sm:p-12 shadow-sm text-center">
             <p className="text-xs uppercase tracking-[0.25em] font-semibold text-accent">
               The Tech Gear Dispatch
             </p>
-            <h2 className="mt-3 font-sans text-3xl sm:text-4xl">
+            <h2 className="mt-3 font-sans text-2xl sm:text-4xl font-bold">
               Curated high-performance tech gear &amp; workspace hardware to your inbox.
             </h2>
             <p className="mt-3 max-w-xl mx-auto text-sm text-muted-foreground leading-relaxed">
@@ -670,6 +365,7 @@ export function StorefrontShell() {
           </div>
         </section>
       </main>
+
       <SiteFooter />
 
       {/* Quick View Dialog */}
@@ -693,7 +389,7 @@ export function StorefrontShell() {
                   {preview.description}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {preview.tags.map((tag) => (
+                  {preview.tags?.map((tag) => (
                     <Badge key={tag} variant="secondary" className="text-[11px]">
                       {tag}
                     </Badge>
@@ -716,7 +412,7 @@ export function StorefrontShell() {
                     onClick={() => setPreview(null)}
                     className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-5 text-xs font-semibold uppercase tracking-widest text-foreground transition-all hover:bg-muted"
                   >
-                    <span>Read Full Specs & Details</span>
+                    <span>Read Full Specs &amp; Details</span>
                     <ArrowRight className="size-3.5" />
                   </Link>
                 </div>

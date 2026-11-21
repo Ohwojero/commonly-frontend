@@ -5,6 +5,7 @@ import { CookieBanner } from '@/components/cookie-banner'
 import { AuthProvider } from '@/lib/auth-store'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.commonlys.com'),
   title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
   description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
   icons: {
@@ -12,6 +13,18 @@ export const metadata: Metadata = {
       { url: '/icon.svg', type: 'image/svg+xml' },
     ],
     apple: '/icon.svg',
+  },
+  openGraph: {
+    title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
+    description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
+    url: 'https://www.commonlys.com',
+    siteName: 'Commonlys',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
+    description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
   },
 }
 

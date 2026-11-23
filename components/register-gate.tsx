@@ -31,7 +31,7 @@ export function RegisterGate({
   showTrigger = true,
   initialMode = 'register',
 }: RegisterGateProps) {
-  const { login, register, user, token, loading: authLoading } = useAuth()
+  const { login, register } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [internalOpen, setInternalOpen] = useState(false)
@@ -40,9 +40,6 @@ export function RegisterGate({
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-
-  // Consider the user logged-in if we have a token (even while user profile is still loading)
-  const isLoggedIn = !!user || !!token
 
   useEffect(() => {
     setMounted(true)
@@ -72,26 +69,10 @@ export function RegisterGate({
     setForm({ name: '', email: '', password: '', location: '' })
   }
 
-  // If already logged in (or has a valid session token), go straight to Amazon
-  const handleTriggerClick = () => {
-    const hasLocalToken =
-      typeof window !== 'undefined' &&
-      !!(localStorage.getItem('commonlys_token') || localStorage.getItem('commonly_token'))
-    if (isLoggedIn || hasLocalToken) {
-      // User is logged in — go straight to Amazon
-      const emailForTracking = user?.email
-      const url =
-        affiliateUrl ||
-        `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
-      trackAffiliateClick(productSlug, emailForTracking)
-      window.open(url, '_blank', 'noopener,noreferrer')
-      return
-    }
-    // Not logged in — ALWAYS open the REGISTER popup first
-    setMode('register')
-    if (isControlled && controlledOnClose) return
-    setInternalOpen(true)
-  }
+  const outboundUrl =
+    affiliateUrl && /^https:\/\/\S+$/i.test(affiliateUrl)
+      ? affiliateUrl
+      : `https://www.amazon.com/s?k=${encodeURIComponent(productSlug?.trim() || buttonLabel)}`
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -99,8 +80,6 @@ export function RegisterGate({
     setLoading(true)
 
     try {
-      let userEmail = form.email
-
       if (mode === 'register') {
         await register(form.email, form.password, form.name || undefined, form.location.trim())
         fetch('/api/activity', {
@@ -122,13 +101,6 @@ export function RegisterGate({
         }
       }
 
-      // Always redirect to Amazon after successful auth if affiliateUrl exists
-      const url = affiliateUrl ||
-        `https://www.amazon.com/s?k=${encodeURIComponent(`${productSlug || ''}`.trim())}`
-      if (productSlug || affiliateUrl) {
-        trackAffiliateClick(productSlug, userEmail, form.location ? form.location.trim() : undefined)
-        window.open(url, '_blank', 'noopener,noreferrer')
-      }
       handleClose()
     } catch (err: any) {
       setMessage(err?.message || 'We could not complete that request. Please try again.')
@@ -140,18 +112,19 @@ export function RegisterGate({
   return (
     <>
       {showTrigger && (
-        <Button
-          type="button"
-          onClick={handleTriggerClick}
-          disabled={authLoading}
+        <a
+          href={outboundUrl}
+          target="_blank"
+          rel="sponsored nofollow noopener noreferrer"
+          onClick={() => trackAffiliateClick(productSlug)}
           className={
             buttonClassName ||
-            'inline-flex h-14 sm:h-11 items-center justify-center gap-2.5 rounded-full bg-primary px-8 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait'
+            'inline-flex h-14 sm:h-11 items-center justify-center gap-2.5 rounded-full bg-primary px-8 text-sm sm:text-xs font-bold sm:font-semibold uppercase tracking-wider text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.99]'
           }
         >
-          <span>{authLoading ? 'Loading...' : buttonLabel}</span>
-          {!authLoading && <ExternalLink className="size-4 sm:size-3.5 opacity-80 shrink-0" />}
-        </Button>
+          <span>{buttonLabel}</span>
+          <ExternalLink className="size-4 sm:size-3.5 opacity-80 shrink-0" />
+        </a>
       )}
 
       {mounted && open && createPortal(
@@ -174,21 +147,13 @@ export function RegisterGate({
                 </p>
                 <h2 id="auth-modal-title" className="mt-2 font-sans text-2xl sm:text-3xl">
                   {mode === 'register'
-                    ? affiliateUrl
-                      ? 'Join before you shop'
-                      : 'Create your account'
-                    : affiliateUrl
-                      ? 'Welcome back'
-                      : 'Sign in to Commonlys'}
+                    ? 'Create your account'
+                    : 'Sign in to Commonlys'}
                 </h2>
                 <p className={`mt-1.5 max-w-[34ch] text-sm leading-relaxed ${mode === 'register' ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {mode === 'register'
-                    ? affiliateUrl
-                      ? 'Create an account to save your favorite products and keep your curated picks together.'
-                      : 'Create an account to save your favorite products and keep your curated picks together.'
-                    : affiliateUrl
-                      ? 'Sign in to access your saved curations and continue to Amazon.'
-                      : 'Sign in to access your saved products and editorial favorites.'}
+                    ? 'Create an account to save your favorite products and keep your curated picks together.'
+                    : 'Sign in to access your saved products and editorial favorites.'}
                 </p>
               </div>
 
@@ -307,7 +272,7 @@ export function RegisterGate({
 
             {/* Amazon Associates Compliance Notice */}
             <p className={`mt-5 rounded-xl p-3 text-[10px] leading-relaxed ${mode === 'register' ? 'bg-white/10 text-primary-foreground' : 'bg-muted text-foreground'}`}>
-              <strong>Amazon Associates Disclosure:</strong> Commonlys is an independent editorial curation. As an Amazon Associate, we earn from qualifying purchases at zero extra cost to you.
+              <strong>Amazon Associates disclosure:</strong> As an Amazon Associate I earn from qualifying purchases.
             </p>
           </div>
         </div>,

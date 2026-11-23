@@ -7,12 +7,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  RotateCcw,
   Share2,
-  ShieldCheck,
   Sparkles,
   Star,
-  Truck,
   Pencil,
   Trash2,
 } from 'lucide-react'
@@ -291,7 +288,7 @@ export function ProductGallery({
                           More Curated Picks
                         </h3>
                         <p className="text-[11px] text-muted-foreground">
-                          Tested &amp; verified on Amazon Prime
+                          More products to explore
                         </p>
                       </div>
                     </div>
@@ -352,13 +349,6 @@ export function ProductGallery({
                                 {item.name}
                               </h4>
                             </Link>
-                            <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                              <Star className="size-3 fill-amber-400 text-amber-400" />
-                              <span className="font-semibold text-foreground">{item.rating}</span>
-                              <span className="text-[10px] text-muted-foreground/75">
-                                ({item.reviewCount || 0})
-                              </span>
-                            </div>
                           </div>
                         </div>
 
@@ -432,7 +422,7 @@ export function ProductGallery({
               </Button>
             </div>
 
-            {/* Ratings & Verification Bar */}
+            {/* Commonlys review summary */}
             <div className="mt-3.5 flex items-center gap-3 border-b border-border/70 pb-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5 font-medium text-foreground">
                 <div className="flex items-center text-amber-500" aria-label="Rate this product">
@@ -459,24 +449,21 @@ export function ProductGallery({
                     </button>
                   ))}
                 </div>
-                <span>{(reviewsData?.rating ?? 0).toFixed(1)}</span>
               </div>
-              <span className="text-muted-foreground/40">•</span>
-              <span>{(reviewsData?.reviewCount ?? 0).toLocaleString()} verified ratings</span>
-              {product.prime && (
+              {reviewsData?.reviewCount ? (
                 <>
+                  <span>{reviewsData.rating.toFixed(1)}</span>
                   <span className="text-muted-foreground/40">•</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Prime Fulfillment
-                  </span>
+                  <span>{reviewsData.reviewCount.toLocaleString()} Commonlys reviews</span>
                 </>
+              ) : (
+                <span>No Commonlys reviews yet</span>
               )}
             </div>
 
             {/* Technical Editorial Verdict / About this item Card */}
             <div className="mt-5 rounded-2xl border border-border/70 bg-gradient-to-br from-muted/30 to-muted/10 p-4 sm:p-5 shadow-2xs">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Sparkles className="size-3.5" />
@@ -485,9 +472,6 @@ export function ProductGallery({
                     About this item
                   </span>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                  Commonlys Verified
-                </span>
               </div>
               {(() => {
                 const descData = parseDescription(product.description)
@@ -666,25 +650,9 @@ export function ProductGallery({
                 </Button>
               </div>
 
-              {/* Luxury Fulfillment Trust Strip */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2.5 border border-border/50">
-                  <Truck className="size-4 text-foreground shrink-0" />
-                  <span className="text-[11px] font-medium leading-tight">Official Prime Fulfillment</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2.5 border border-border/50">
-                  <ShieldCheck className="size-4 text-foreground shrink-0" />
-                  <span className="text-[11px] font-medium leading-tight">Authentic Brand Guarantee</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2.5 border border-border/50">
-                  <RotateCcw className="size-4 text-foreground shrink-0" />
-                  <span className="text-[11px] font-medium leading-tight">Amazon 30-Day Returns</span>
-                </div>
-              </div>
-
-              {/* Amazon Compliance Notice */}
+              {/* Amazon Associates disclosure */}
               <p className="mt-1 text-[11px] text-muted-foreground/80 leading-relaxed border border-border/40 rounded-xl bg-muted/20 px-3.5 py-2">
-                <strong>Amazon Associates Disclosure:</strong> As an Amazon Associate, Commonlys earns from qualifying purchases. Live pricing, stock availability, and Prime delivery are fulfilled securely on Amazon.
+                As an Amazon Associate I earn from qualifying purchases. Check the retailer listing for current price, availability, shipping, and return details.
               </p>
             </div>
           </section>

@@ -1,5 +1,7 @@
 // Central API client for the Commonlys NestJS backend
 
+import { getCookieConsent } from '@/lib/cookie-consent'
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -374,12 +376,12 @@ export function logActivity(dto: {
   })
 }
 
-export function trackAffiliateClick(productSlug?: string, email?: string, location?: string): void {
+export function trackAffiliateClick(productSlug?: string): void {
+  if (typeof window === 'undefined' || getCookieConsent() !== 'accepted') return
+
   const payload = JSON.stringify({
     eventType: 'affiliate_click',
-    eventName: email ? 'Outbound Amazon Prime Click' : 'Outbound Amazon Prime Click (Guest)',
-    email: email || undefined,
-    location: location || undefined,
+    eventName: 'Outbound affiliate link click',
     productSlug: productSlug || undefined,
   })
 

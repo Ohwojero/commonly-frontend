@@ -12,6 +12,7 @@ import {
   getStorefrontRouteSlug,
   type StorefrontNavGroup,
 } from '@/lib/storefront-navigation'
+import { COOKIE_CONSENT_SETTINGS_EVENT } from '@/lib/cookie-consent'
 
 function DropdownGroup({
   group,
@@ -364,7 +365,7 @@ export function SiteFooter() {
             Commonlys.
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-6 text-primary-foreground/75">
-            An independent tech curation platform for high-performance personal and workspace gear. We research, test, and collate the finest smart automotive tech, EV charging systems, studio compute, and ergonomic workspace hardware.
+            An independent directory of personal and workspace technology, smart automotive gear, EV charging systems, studio compute, and ergonomic hardware.
           </p>
         </div>
         <div>
@@ -463,11 +464,24 @@ export function SiteFooter() {
       </div>
       <div className="mx-auto mt-14 flex max-w-7xl flex-col gap-3 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/60 sm:flex-row sm:items-center sm:justify-between">
         <span>© 2026 Commonlys. All rights reserved.</span>
-        <span className="max-w-md text-center leading-relaxed sm:text-right">
-          As an Amazon Associate I earn from qualifying purchases. Product prices, ratings, and
-          availability are subject to change. Any price and availability information displayed on
-          Amazon at the time of purchase will apply.
-        </span>
+        <div className="flex flex-col items-center gap-2 sm:items-end">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-primary-foreground">Privacy</Link>
+            <Link href="/terms" className="underline underline-offset-2 hover:text-primary-foreground">Terms</Link>
+            <Link href="/affiliate-disclosure" className="underline underline-offset-2 hover:text-primary-foreground">Affiliate disclosure</Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event(COOKIE_CONSENT_SETTINGS_EVENT))}
+              className="underline underline-offset-2 hover:text-primary-foreground"
+            >
+              Cookie settings
+            </button>
+          </div>
+          <span className="max-w-md text-center leading-relaxed sm:text-right">
+            As an Amazon Associate I earn from qualifying purchases. Check Amazon for current prices,
+            availability, shipping, and return details.
+          </span>
+        </div>
       </div>
     </footer>
   )

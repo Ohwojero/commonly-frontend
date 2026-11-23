@@ -1,13 +1,13 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { CookieBanner } from '@/components/cookie-banner'
+import { OptionalTrackingScripts } from '@/components/optional-tracking-scripts'
 import { AuthProvider } from '@/lib/auth-store'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.commonlys.com'),
-  title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
-  description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
+  title: 'Commonlys. — Curated Product Directory',
+  description: 'Independent product curation for everyday technology, smart home, kitchen, automotive, and workspace gear.',
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
@@ -15,16 +15,16 @@ export const metadata: Metadata = {
     apple: '/icon.svg',
   },
   openGraph: {
-    title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
-    description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
+    title: 'Commonlys. — Curated Product Directory',
+    description: 'Independent product curation for everyday technology, smart home, kitchen, automotive, and workspace gear.',
     url: 'https://www.commonlys.com',
     siteName: 'Commonlys',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Commonlys. — Curated Workspace & High-Performance Tech Gear',
-    description: 'An independent curation of verified high-performance everyday tech, smart automotive gear, and workspace architecture on Amazon.',
+    title: 'Commonlys. — Curated Product Directory',
+    description: 'Independent product curation for everyday technology, smart home, kitchen, automotive, and workspace gear.',
   },
 }
 
@@ -48,8 +48,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <CookieBanner />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-          <script type="text/javascript" src="https://s.skimresources.com/js/309805X1798173.skimlinks.js"></script>
+          <OptionalTrackingScripts />
         </AuthProvider>
       </body>
       

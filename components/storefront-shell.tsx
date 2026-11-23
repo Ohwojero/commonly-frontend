@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   ArrowRight,
   CheckCircle2,
@@ -9,7 +9,6 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import { fetchProducts, formatPrice, type ApiProduct } from '@/lib/api'
 import { useAuth } from '@/lib/auth-store'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,35 +19,21 @@ import { ProductCard } from '@/components/product-card'
 import { RegisterGate } from '@/components/register-gate'
 import { storefrontNavGroups, storefrontNavSlug } from '@/lib/storefront-navigation'
 import { products as fallbackProducts, isNotDummyProduct } from '@/lib/products'
-
-// Map ApiProduct to frontend-friendly display shape
-function toDisplayProduct(p: ApiProduct) {
-  return {
-    ...p,
-    price: formatPrice(Number(p.price)),
-    rating: Number(p.rating).toFixed(1),
-    category: p.subcategory?.category?.label || p.subcategory?.label || '',
-    categorySlug: p.subcategory?.category?.slug || '',
-    subcategory: p.subcategory?.label,
-    subcategorySlug: p.subcategory?.slug,
-    prime: !!p.affiliateUrl,
-    isSpotlight: !!p.isSpotlight,
-  }
-}
+import type { Product } from '@/lib/products'
 
 export function StorefrontShell({
   initialProducts,
 }: {
-  initialProducts?: ReturnType<typeof toDisplayProduct>[]
+  initialProducts?: Product[]
 } = {}) {
   const { user } = useAuth()
   const [searchOpen, setSearchOpen] = useState(false)
-  const [preview, setPreview] = useState<ReturnType<typeof toDisplayProduct> | null>(null)
+  const [preview, setPreview] = useState<Product | null>(null)
   const [activeTabKey, setActiveTabKey] = useState('')
   const [activeGroupSlug, setActiveGroupSlug] = useState<string | null>(null)
   const [emailInput, setEmailInput] = useState('')
   const [emailSubscribed, setEmailSubscribed] = useState(false)
-  const [allProducts, setAllProducts] = useState<ReturnType<typeof toDisplayProduct>[]>(() => {
+  const [allProducts] = useState<Product[]>(() => {
     if (initialProducts && initialProducts.length > 0) return initialProducts
     return (fallbackProducts as any[]).map((p) => ({
       ...p,
@@ -57,19 +42,6 @@ export function StorefrontShell({
       isSpotlight: !!p.isSpotlight,
     }))
   })
-
-  useEffect(() => {
-    fetchProducts({ sort: 'views' })
-      .catch(() => [])
-      .then((productsData) => {
-        if (productsData && productsData.length > 0) {
-          const valid = productsData.filter((p) => isNotDummyProduct(p.slug))
-          if (valid.length > 0) {
-            setAllProducts(valid.map(toDisplayProduct))
-          }
-        }
-      })
-  }, [])
 
   const dynamicFilterTabs = storefrontNavGroups.flatMap((group) => [
     {
@@ -132,7 +104,7 @@ export function StorefrontShell({
     if (!activeTab) return true
     if (activeTab.key.startsWith('group:')) {
       const g = storefrontNavGroups.find((gr) => gr.slug === activeTab.groupSlug)
-      return g ? g.catalogSlugs.includes(p.categorySlug) : true
+      return g ? g.catalogSlugs.includes(p.categorySlug || '') : true
     }
     return (
       p.subcategorySlug === activeTab.subcategorySlug ||
@@ -160,7 +132,7 @@ export function StorefrontShell({
             <Search className="size-5 text-muted-foreground shrink-0" />
             <Input
               autoFocus
-              placeholder="Search verified products, brands, or tech categories…"
+              placeholder="Search products, brands, or tech categories…"
               className="h-10 flex-1 border-0 bg-transparent text-sm focus-visible:ring-0"
               onChange={(e) => {
                 const q = e.target.value.toLowerCase()
@@ -196,13 +168,13 @@ export function StorefrontShell({
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-accent mb-2">
                 <Sparkles className="size-3" />
-                <span>Verified Direct Fulfillment on Amazon</span>
+                <span>Curated product collection</span>
               </div>
               <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 {activeGroupName || 'Curated Products'}
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                Showing {filteredProducts.length} verified tech &amp; workspace picks
+                Showing {filteredProducts.length} curated tech &amp; workspace picks
               </p>
             </div>
 

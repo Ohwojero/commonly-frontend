@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, Eye, Heart, Star } from 'lucide-react'
+import { ArrowRight, Eye, Heart } from 'lucide-react'
 import type { Product } from '@/lib/products'
 import { toggleSave } from '@/lib/api'
 import { useAuth } from '@/lib/auth-store'
@@ -92,15 +92,6 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/70">
               {product.brand}
             </p>
-            <Link
-              href={`/products/${product.slug}#reviews`}
-              aria-label={`View reviews for ${product.name}`}
-              className="flex items-center gap-1 text-[11px] text-foreground/70 transition-colors hover:text-foreground"
-            >
-              <Star className="size-3 fill-amber-400 text-amber-400" />
-              <span className="font-semibold text-foreground">{product.rating}</span>
-              <span className="text-muted-foreground">({product.reviewCount?.toLocaleString() ?? 0})</span>
-            </Link>
           </div>
 
           <Link href={`/products/${product.slug}`} className="block">
@@ -113,13 +104,6 @@ export function ProductCard({ product, onPreview }: ProductCardProps) {
             {product.subcategory || product.category}
           </p>
 
-          <div className="mt-2.5 flex items-center justify-between text-[11px]">
-            <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-semibold">
-              <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              Verified In Stock
-            </span>
-            <span className="text-muted-foreground font-medium">Live Amazon Pricing</span>
-          </div>
         </div>
 
         {/* Action Button: Buy on Amazon */}

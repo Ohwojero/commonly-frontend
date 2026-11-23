@@ -4,29 +4,36 @@ import { useEffect, useState } from 'react'
 import { Cookie, X } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import {
+  COOKIE_CONSENT_SETTINGS_EVENT,
+  getCookieConsent,
+  saveCookieConsent,
+} from '@/lib/cookie-consent'
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Check if user has already made a cookie choice
-    const consent =
-      localStorage.getItem('commonlys_cookie_consent') ||
-      localStorage.getItem('commonly_cookie_consent')
-    if (!consent) {
-      // Delay slightly for smooth entrance
-      const timer = setTimeout(() => setVisible(true), 1200)
-      return () => clearTimeout(timer)
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (!getCookieConsent()) {
+      timer = setTimeout(() => setVisible(true), 1200)
+    }
+
+    const openSettings = () => setVisible(true)
+    window.addEventListener(COOKIE_CONSENT_SETTINGS_EVENT, openSettings)
+    return () => {
+      if (timer) clearTimeout(timer)
+      window.removeEventListener(COOKIE_CONSENT_SETTINGS_EVENT, openSettings)
     }
   }, [])
 
   const handleAccept = () => {
-    localStorage.setItem('commonlys_cookie_consent', 'accepted')
+    saveCookieConsent('accepted')
     setVisible(false)
   }
 
   const handleDecline = () => {
-    localStorage.setItem('commonlys_cookie_consent', 'declined')
+    saveCookieConsent('declined')
     setVisible(false)
   }
 
@@ -44,14 +51,17 @@ export function CookieBanner() {
           </div>
           <div>
             <h3 className="font-sans text-base font-semibold tracking-tight text-foreground">
-              Cookie &amp; Affiliate Transparency
+              Privacy &amp; Cookie Choices
             </h3>
             <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-              We use essential cookies and Amazon Associates referral tags to maintain your curated favorites, analyze editorial traffic, and facilitate direct checkout on Amazon. By clicking &quot;Accept All&quot;, you consent to our use of cookies.
+              Essential account storage works by default. If you accept, we record product-link clicks and load Vercel Analytics and Skimlinks. Amazon links work either way.
             </p>
-            <div className="mt-2 text-[11px] text-muted-foreground">
-              <Link href="/about" className="underline underline-offset-2 hover:text-foreground">
-                Read our editorial disclosure &amp; privacy terms
+            <div className="mt-2 flex gap-4 text-[11px] text-muted-foreground">
+              <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-foreground">
+                Privacy notice
+              </Link>
+              <Link href="/affiliate-disclosure" className="underline underline-offset-2 hover:text-foreground">
+                Affiliate disclosure
               </Link>
             </div>
           </div>
@@ -60,7 +70,7 @@ export function CookieBanner() {
         <button
           type="button"
           onClick={handleDecline}
-          aria-label="Close cookie banner"
+          aria-label="Choose essential-only settings"
           className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="size-4" />
@@ -83,7 +93,7 @@ export function CookieBanner() {
           onClick={handleAccept}
           className="rounded-full text-xs font-semibold uppercase tracking-wider px-5"
         >
-          Accept All Cookies
+          Accept Optional
         </Button>
       </div>
     </aside>

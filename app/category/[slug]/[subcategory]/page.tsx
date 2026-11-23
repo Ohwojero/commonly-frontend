@@ -166,7 +166,7 @@ export default async function SubcategoryPage({
               The {item.toLowerCase()} edit.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-base leading-relaxed text-white/80">
-              Explore verified high-performance tech products selected for {item.toLowerCase()}, with rigorous specification teardowns and direct Amazon fulfillment.
+              Explore curated technology selected for {item.toLowerCase()}. Product details and purchase terms are available from the retailer.
             </p>
           </div>
         </section>

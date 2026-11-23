@@ -66,7 +66,7 @@ export default function RegisterPage() {
               Create an account to save your favorite products and keep your curated picks together.
             </p>
             <p className="mt-3 text-xs leading-5 text-primary-foreground">
-              <strong>Amazon Associates Disclosure:</strong> Commonlys is an independent editorial curation. As an Amazon Associate, we earn from qualifying purchases at zero extra cost to you.
+              As an Amazon Associate I earn from qualifying purchases.
             </p>
           </div>
 
